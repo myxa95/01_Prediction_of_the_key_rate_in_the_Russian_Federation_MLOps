@@ -1,0 +1,27 @@
+parcing:
+  pred_days: 0.15
+
+preprocessing:
+  pred_days: 0.15
+  random_sate: 42
+
+train:
+  random_sate: 42
+  backend_path: '../backend/src/data'
+  data_path: '../data'
+  model_path: '../models/prophet.joblib'
+  study_path: '../models/study.joblib'
+  metrics_path: '..report/metrics.json'
+  params_path: '..report/best_params.json'
+
+evaluate:
+  predict_path: ../data/check/test.csv
+
+frontend:
+  main_image: '../data/frontend/main_image.png'
+
+endpoints:
+  parcer: 'http://fatsapi:8000/parcer'
+  train: 'http://fastapi:8000/train'
+  prediction_test: 'http://fastapi:8000/prediction_test'
+  prediction_future: 'http://fastapi:8000/prediction_future'
