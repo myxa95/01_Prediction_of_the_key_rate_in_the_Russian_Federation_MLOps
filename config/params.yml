@@ -1,5 +1,6 @@
 parcing:
   pred_days: 0.15
+  URL: 'https://www.cbr.ru/hd_base/keyrate/?UniDbQuery.Posted=True&UniDbQuery.From=17.09.2013&UniDbQuery.To='
 
 preprocessing:
   pred_days: 0.15
@@ -9,8 +10,8 @@ train:
   random_sate: 42
   backend_path: '../backend/src/data'
   data_path: '../data'
-  model_path: '../models/prophet.joblib'
-  study_path: '../models/study.joblib'
+  model_path: '../models/prophet.json'
+  study_path: '../models/study.json'
   metrics_path: '..report/metrics.json'
   params_path: '..report/best_params.json'
 
