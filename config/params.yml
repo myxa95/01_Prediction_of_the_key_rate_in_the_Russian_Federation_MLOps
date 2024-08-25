@@ -12,10 +12,12 @@ train:
   pred_days_forecast: 180
   backend_path: '../backend/src/data'
   data_path: '../data'
-  model_path: '../models/prophet.json'
+  model_path: '../models'
   study_path: '../models/study.json'
   metrics_path: '..report/metrics.json'
   params_path: '..report/best_params.json'
+  N_TRIALS: 1000
+  TIMEOUT: 3600
 
 evaluate:
   predict_path: ../data/check/test.csv

@@ -16,12 +16,11 @@ requests = "*"
 beautifulsoup4 = "*"
 scipy = "*"
 holidays = "*"
-neuralprophet = "*"
 prophet = "*"
 scikit-learn = "*"
 tqdm = "*"
 plotly = "*"
-
+optuna = "*"
 
 [build-system]
 requires = ["poetry-core"]
