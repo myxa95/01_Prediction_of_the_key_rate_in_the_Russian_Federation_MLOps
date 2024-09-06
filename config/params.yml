@@ -14,7 +14,7 @@ train:
   data_path: '../data'
   model_path: '../models'
   study_path: '../models'
-  metrics_path: '../report'
+  metrics_path: '../report/metrics.json'
   params_path: '../report'
   N_TRIALS: 1000
   TIMEOUT: 1200
