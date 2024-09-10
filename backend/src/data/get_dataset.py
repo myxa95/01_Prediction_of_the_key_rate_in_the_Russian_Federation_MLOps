@@ -1,7 +1,12 @@
+"""
+Программа: Парсит ключевую ставку с URL сайта ЦБ РФ и возвращает pandas DataFrame.
+Версия: 1.0
+"""
+
+from datetime import date
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
-from datetime import date
 
 def get_dataset(config):
     """
@@ -14,8 +19,15 @@ def get_dataset(config):
     pd.DataFrame: DataFrame, содержащий спарсенные данные ключевой ставки.
     """
     url = config['parcing']["URL"] + date.today().strftime('%d.%m.%Y')
-    response = requests.get(url)
-    response.raise_for_status()
+    try:
+        response = requests.get(url, timeout=30)
+        response.raise_for_status()
+    except requests.exceptions.Timeout:
+        print("Ошибка таймаута: не удалось получить данные с URL")
+        return None
+    except requests.exceptions.RequestException as e:
+        print(f"Ошибка запроса: {e}")
+        return None
 
     soup = BeautifulSoup(response.text, "html.parser")
     table = soup.find_all("table")
