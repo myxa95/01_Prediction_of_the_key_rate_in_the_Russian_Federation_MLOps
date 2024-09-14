@@ -12,19 +12,21 @@ config = yaml.load(open(config_path), Loader=yaml.FullLoader)
 data_path = config['train']['data_path']
 
 # Чтение DataFrame df в файл data/df.csv
-df = pd.read_csv(f'{data_path}/df.csv')
+df_path = config['preprocessing']['df_path']
+df = pd.read_csv(df_path)
 
 def interpolate_missing_values(df: pd.DataFrame, column_name):
     """
     Фильтрация выбросов и интерполяция пропущенных значений в указанном столбце.
 
     Параметры:
-    - df (pandas.DataFrame): входные данные
+    - df (pd.DataFrame): входные данные
     - column_name (str): имя столбца для обработки
 
     Возвращает:
-    - df_filtered (pandas.DataFrame): Интерполированные данные
+    - df_filtered (pd.DataFrame): Интерполированные данные
     """
+    
     # Определение последней даты, для заполнения графика интерполяцией
     last_date = df['date'].max()
 
@@ -49,17 +51,16 @@ def interpolate_missing_values(df: pd.DataFrame, column_name):
 
     return df_filtered
 
-def prepare_data_for_prophet(df_filtered: pd.DataFrame):
+def prepare_data_for_prophet(df: pd.DataFrame, **kwargs):
     """
     Подготовка интеполируемых данных для Prophet путем переименования столбцов и сортировке по дате.
 
     Параметры:
-    df_filtered (pandas.DataFrame): Интеполируемые данные
+    df (pd.DataFrame): Интеполируемые данные
 
     Возвращает:
-    pandas.DataFrame: Подготовленные данные для Prophet
+    pd.DataFrame: Подготовленные данные для Prophet
     """
-    df = df_filtered.copy()  # Создаем копию оригинальных данных
 
     # Переименовываем столбцы для Prophet
     df.columns = ['ds', 'y']
@@ -69,6 +70,7 @@ def prepare_data_for_prophet(df_filtered: pd.DataFrame):
     df = df.reset_index(drop=True)
 
     # Сохранение DataFrame df в файл data/df.csv
-    df.to_csv(f'{data_path}/df.csv', index=False)
+    df_path = config['preprocessing']['df_path']
+    df.to_csv(df_path, index=False)
     
     return df

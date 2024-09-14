@@ -6,6 +6,9 @@ preprocessing:
   pred_days: 0.15
   random_sate: 42
   drop_trash: 
+  train_path: '../data/df_train.csv'
+  test_path: '../data/df_test.csv'
+  df_path: '../data/df.csv'
   
 train:
   random_sate: 42

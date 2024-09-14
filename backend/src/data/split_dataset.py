@@ -15,13 +15,13 @@ def split_dataset(df, config):
     Разделение данных на обучающую и тестовую выборки и сохранение их в файлы.
 
     Параметры:
-    df (pandas.DataFrame): Входные данные
+    df (pd.DataFrame): Входные данные
     config (словарь): Словарь, содержащий параметры конфигурации
     data_path (строка): Путь к директории для сохранения файлов
 
     Возвращает:
-    df_train (pandas.DataFrame): Обучающая выборка
-    df_test (pandas.DataFrame): Тестовая выборка
+    df_train (pd.DataFrame): Обучающая выборка
+    df_test (pd.DataFrame): Тестовая выборка
     """
     pred_days = int(df.shape[0]*config['parcing']['pred_days'])
     df_train = df[:-pred_days]

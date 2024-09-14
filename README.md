@@ -1,7 +1,6 @@
 # Прогнозирование ключевой ставки ЦБ РФ моделью Prophet.
 [![Python - Version](https://img.shields.io/badge/Python-3.11-blue?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![Prophet - Version](https://img.shields.io/badge/Prophet-1.1.5-red?style=for-the-badge&logo=prophet)](https://facebook.github.io/prophet/)
-[![NeuralProphet - Version](https://img.shields.io/badge/NeuralProphet-0.8.0-red?style=for-the-badge&logo=neuralprophet)](https://neuralprophet.com/)
 
 ## Описание работы
 Проект использует данные по ключевой ставке Банка России для прогнозирования ее значений в будущем с помощью модели Prophet. Основные шаги проекта:
@@ -30,4 +29,4 @@
 - **notebooks** <br> 
 Jupyter ноутбуки, в которых описана техническая часть: построение моделей, обучение и тестирование
 - **report** <br>
-Сохраненные лучше параметры после подбора параметров при помощи Optuna
+Сохраненные лучше параметры после подбора параметров при помощи Optuna, сохранение метрик.
