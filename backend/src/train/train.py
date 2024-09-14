@@ -1,5 +1,7 @@
 """
-Программа: Обучение модели Prophet на данных. Функция оптимизации гиперпараметров модели Prophet.
+Программа: Обучение модели Prophet на данных.
+Функция оптимизации гиперпараметров модели Prophet.
+Генерирует прогноз на заданное количество дней вперед.
 Версия: 1.0
 """
 
@@ -103,3 +105,18 @@ def train_model(df, **kwargs):
     model.fit(df)
 
     return model
+
+def generate_forecast(model, pred_days):
+    """
+    Генерирует прогноз на заданное количество дней вперед.
+
+    Параметры:
+    - model: модель, используемая для прогнозирования
+    - pred_days: количество дней, на которое нужно сделать прогноз
+
+    Возвращает:
+    - forecast: DataFrame с прогнозом
+    """
+    future = model.make_future_dataframe(periods=pred_days, freq='D')
+    forecast = model.predict(future)
+    return forecast
