@@ -7,8 +7,13 @@ from datetime import date
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
+import yaml
 
-def get_dataset(config):
+config_path = r'../../config/params.yml'
+with open(config_path) as file:
+    config = yaml.load(file, Loader=yaml.FullLoader)
+
+def get_dataset(url):
     """
     Парсит ключевую ставку с URL сайта ЦБ РФ и возвращает pandas DataFrame.
 
