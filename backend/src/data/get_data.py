@@ -9,8 +9,8 @@ from bs4 import BeautifulSoup
 import pandas as pd
 import yaml
 
-config_path = r'../../config/params.yml'
-with open(config_path) as file:
+CONFIG_PATH = '../../../config/params.yml'
+with open(CONFIG_PATH, encoding='utf-8') as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
 
 def get_dataset(url):

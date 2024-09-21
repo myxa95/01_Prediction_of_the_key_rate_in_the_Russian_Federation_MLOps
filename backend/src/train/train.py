@@ -7,16 +7,16 @@
 
 import os
 import json
+import logging
 import numpy as np
 import optuna
-import logging
 import pandas as pd
 
 from prophet import Prophet
 from prophet.diagnostics import cross_validation
 
 
-def optimize_prophet_hyperparameters(df_train, model_path, params_path, **config):
+def optimize_prophet_hyperparameters(df_train, model_path, params_path, config):
     """
     Функция оптимизации гиперпараметров модели Prophet.
 

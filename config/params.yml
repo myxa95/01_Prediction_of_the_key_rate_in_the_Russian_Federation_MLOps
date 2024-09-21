@@ -20,7 +20,7 @@ train:
   metrics_path: '../report/metrics.json'
   params_path: '../report'
   N_TRIALS: 1000
-  TIMEOUT: 1800
+  TIMEOUT: 1200
 
 evaluate:
   predict_path: ../data/check/test.csv

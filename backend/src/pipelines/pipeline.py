@@ -8,16 +8,12 @@ import yaml
 
 from ..data.get_data import get_dataset
 from ..data.interpolate_missing_values_and_prepare import interpolate_missing_values
+from ..data.prepare_data_for_prophet import prepare_data_for_prophet
 from ..data.split_dataset import split_dataset
-from ..data.create_features import create_features
 from ..train.train import train_model, optimize_prophet_hyperparameters
 
-# Загрузка конфигурации
-# config_path = r'../config/params.yml'
-# with open(config_path) as file:
-#     config = yaml.load(file, Loader=yaml.FullLoader)
 
-def pipeline_training(config_path: str):
+def pipeline_training(CONFIG_PATH: str):
     """
     Получение данных с сайта ЦБ РФ,
     интерполяция пропущенных значений,
@@ -32,8 +28,10 @@ def pipeline_training(config_path: str):
         None
     """
     # Загрузка конфигурации
-    with open(config_path) as file:
+    CONFIG_PATH = '../../../config/params.yml'
+    with open(CONFIG_PATH, encoding='utf-8') as file:
         config = yaml.load(file, Loader=yaml.FullLoader)
+
     preprocessing_config = config['preprocessing']
     training_config = config['training']
     parcing_config = config['parcing']
@@ -44,6 +42,9 @@ def pipeline_training(config_path: str):
     # Интерполяция пропущенных значений
     train_data = interpolate_missing_values(train_data, 'key_rate')
 
+    # Подготовка данных для Prophet
+    train_data = prepare_data_for_prophet(train_data)
+    
     # Разделение на обучающую и тестовую выборки
     df_train, df_test = split_dataset(train_data, config)
     
@@ -51,4 +52,4 @@ def pipeline_training(config_path: str):
     study = optimize_prophet_hyperparameters(df_train, **training_config)
 
     # Обучение на лучших параметрах
-    reg = train_model(df=df_train)
+    reg = train_model(df=df_train, **study)
