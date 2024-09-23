@@ -1,4 +1,4 @@
-parcing:
+parsing:
   pred_days: 0.15
   URL: 'https://www.cbr.ru/hd_base/keyrate/?UniDbQuery.Posted=True&UniDbQuery.From=17.09.2013&UniDbQuery.To='
 
@@ -29,7 +29,7 @@ frontend:
   main_image: '../data/frontend/main_image.png'
 
 endpoints:
-  parcer: 'http://fatsapi:8000/parcer'
+  parser: 'http://fatsapi:8000/parser'
   train: 'http://fastapi:8000/train'
   prediction_test: 'http://fastapi:8000/prediction_test'
   prediction_future: 'http://fastapi:8000/prediction_future'

@@ -1,6 +1,8 @@
 import numpy as np
+import json
 import pandas as pd
-from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error, mean_squared_error
+from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error, mean_squared_error, r2_score, mean_squared_log_error
+from datetime import datetime
 
 def r2_adjusted(y_true: np.ndarray, y_pred: np.ndarray,
                 X_test: np.ndarray) -> float:
@@ -68,4 +70,21 @@ def get_metrics(y_test: np.ndarray,
     df_metrics['RMSE'] = np.sqrt(mean_squared_error(y_test, y_pred))
 
 
+    return df_metrics
+
+def save_metrics(df_metrics: pd.DataFrame, model: object, metrics_path: str):
+    """
+    Сохранение метрик в файл
+    """
+    df_metrics['date'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    df_metrics.to_json(metrics_path, orient='records', lines=True, mode='a')
+    with open(metrics_path, 'w') as file:
+        json.dump(df_metrics, file)
+
+def load_metrics(metrics_path: str):
+    """
+    Загрузка метрик из файла
+    """
+    with open(metrics_path, 'r') as file:
+        df_metrics = json.load(file)
     return df_metrics

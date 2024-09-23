@@ -7,8 +7,9 @@ import pandas as pd
 import numpy as np
 import yaml
 
-config_path = r'../config/params.yml'
-config = yaml.load(open(config_path), Loader=yaml.FullLoader)
+CONFIG_PATH = '../../../config/params.yml'
+with open(CONFIG_PATH, encoding='utf-8') as file:
+    config = yaml.load(file, Loader=yaml.FullLoader)
 data_path = config['train']['data_path']
 
 # Чтение DataFrame df в файл data/df.csv
@@ -51,7 +52,7 @@ def interpolate_missing_values(df: pd.DataFrame, column_name):
 
     return df_filtered
 
-def prepare_data_for_prophet(df: pd.DataFrame, **kwargs):
+def prepare_data_for_prophet(df: pd.DataFrame):
     """
     Подготовка интеполируемых данных для Prophet путем переименования столбцов и сортировке по дате.
 
@@ -69,8 +70,9 @@ def prepare_data_for_prophet(df: pd.DataFrame, **kwargs):
     df = df.sort_values('ds')
     df = df.reset_index(drop=True)
 
+    # Перенес сохранение в get_metrics.py def save_metrics
     # Сохранение DataFrame df в файл data/df.csv
-    df_path = config['preprocessing']['df_path']
-    df.to_csv(df_path, index=False)
+    # df_path = config['preprocessing']['df_path']
+    # df.to_csv(df_path, index=False)
     
     return df

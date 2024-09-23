@@ -13,7 +13,7 @@ CONFIG_PATH = '../../../config/params.yml'
 with open(CONFIG_PATH, encoding='utf-8') as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
 
-def get_dataset(url):
+def get_dataset(cfg):
     """
     Парсит ключевую ставку с URL сайта ЦБ РФ и возвращает pandas DataFrame.
 
@@ -23,7 +23,7 @@ def get_dataset(url):
     Возвращает:
     pd.DataFrame: DataFrame, содержащий спарсенные данные ключевой ставки.
     """
-    url = config['parcing']["URL"] + date.today().strftime('%d.%m.%Y')
+    url = cfg['parsing']["URL"] + date.today().strftime('%d.%m.%Y')
     try:
         response = requests.get(url, timeout=30)
         response.raise_for_status()
