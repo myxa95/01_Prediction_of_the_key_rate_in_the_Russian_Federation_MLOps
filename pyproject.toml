@@ -20,6 +20,9 @@ plotly = "*"
 optuna = "*"
 seaborn = "*"
 black = "*"
+fastapi = "*"
+pydantic = "*"
+uvicorn = "^0.30.6"
 
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.29.5"

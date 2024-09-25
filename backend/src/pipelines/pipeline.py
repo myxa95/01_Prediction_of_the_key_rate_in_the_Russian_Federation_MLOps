@@ -4,6 +4,7 @@
 """
 
 import os
+import json
 import yaml
 
 from ..data.get_data import get_dataset
@@ -27,7 +28,6 @@ def pipeline_training(config_path: str):
         None
     """
     # Загрузка конфигурации
-    config_path = '../../../config/params.yml'
     with open(config_path, encoding='utf-8') as file:
         config = yaml.load(file, Loader=yaml.FullLoader)
 
@@ -37,20 +37,20 @@ def pipeline_training(config_path: str):
 
     # Получение данных с сайта ЦБ РФ
     train_data = get_dataset(cfg=parcing_config["URL"])
+    # Интерполяция пропущенных значений
+    train_data = interpolate_missing_values(train_data, 'key_rate')
+    # Подготовка данных для Prophet
+    train_data = prepare_data_for_prophet(train_data)
+    # Разделение на обучающую и тестовую выборки
+    df_train, df_test = split_dataset(train_data, config)
+    # Поиск оптимальных параметров
+    study = optimize_prophet_hyperparameters(df_train, **training_config)
+    # Обучение на лучших параметрах
+    reg = train_model(df=df_train, **study)
 
-    # # Интерполяция пропущенных значений
-    # train_data = interpolate_missing_values(train_data, 'key_rate')
+    # Сохранение модели и параметров
+    with open(training_config['model_path'], 'w') as model_file:
+        json.dump(reg, model_file)
 
-    # # Подготовка данных для Prophet
-    # train_data = prepare_data_for_prophet(train_data)
-    
-    # # Разделение на обучающую и тестовую выборки
-    # df_train, df_test = split_dataset(train_data, config)
-    
-    # # Поиск оптимальных параметров
-    # study = optimize_prophet_hyperparameters(df_train, **training_config)
-
-    # # Обучение на лучших параметрах
-    # reg = train_model(df=df_train, **study)
-
-    return print(train_data)
+    with open(training_config['params_path'], 'w') as params_file:
+        json.dump(study, params_file)
