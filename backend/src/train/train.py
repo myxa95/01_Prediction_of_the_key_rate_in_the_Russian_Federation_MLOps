@@ -11,12 +11,25 @@ import logging
 import numpy as np
 import optuna
 import pandas as pd
+import yaml
 
 from prophet import Prophet
 from prophet.diagnostics import cross_validation
 
+CONFIG_PATH = '../../../config/params.yml'
+with open(CONFIG_PATH, encoding='utf-8') as file:
+    config = yaml.load(file, Loader=yaml.FullLoader)
+data_path = config['train']['data_path']
 
-def optimize_prophet_hyperparameters(df_train, model_path, params_path, config):
+# Чтение DataFrame df_train в файл data/df_train.csv
+train_path = config['preprocessing']['train_path']
+df_train = pd.read_csv(train_path)
+
+# Чтение DataFrame df_test в файл data/df_test.csv
+test_path = config['preprocessing']['test_path']
+df_test = pd.read_csv(test_path)
+
+def optimize_prophet_hyperparameters(df_train: pd.DataFrame, model_path, params_path, config):
     """
     Функция оптимизации гиперпараметров модели Prophet.
 

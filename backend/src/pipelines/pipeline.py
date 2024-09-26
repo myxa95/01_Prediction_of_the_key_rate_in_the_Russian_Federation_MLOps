@@ -7,11 +7,11 @@ import os
 import json
 import yaml
 
-from ..data.get_data import get_dataset
-from ..data.interpolate_missing_values_and_prepare import interpolate_missing_values
-from ..data.prepare_data_for_prophet import prepare_data_for_prophet
-from ..data.split_dataset import split_dataset
-from ..train.train import train_model, optimize_prophet_hyperparameters
+from train.train import train_model, optimize_prophet_hyperparameters
+from data.get_data import get_dataset
+from data.interpolate_missing_values_and_prepare import interpolate_missing_values
+from data.prepare_data_for_prophet import prepare_data_for_prophet
+from data.split_dataset import split_dataset
 
 def pipeline_training(config_path: str):
     """
@@ -32,8 +32,8 @@ def pipeline_training(config_path: str):
         config = yaml.load(file, Loader=yaml.FullLoader)
 
     preprocessing_config = config['preprocessing']
-    training_config = config['training']
-    parcing_config = config['parcing']
+    training_config = config['train']
+    parcing_config = config['parsing']
 
     # Получение данных с сайта ЦБ РФ
     train_data = get_dataset(cfg=parcing_config["URL"])
@@ -49,8 +49,8 @@ def pipeline_training(config_path: str):
     reg = train_model(df=df_train, **study)
 
     # Сохранение модели и параметров
-    with open(training_config['model_path'], 'w') as model_file:
+    with open(training_config['model_path'], 'w', encoding='utf-8') as model_file:
         json.dump(reg, model_file)
 
-    with open(training_config['params_path'], 'w') as params_file:
+    with open(training_config['params_path'], 'w', encoding='utf-8') as params_file:
         json.dump(study, params_file)

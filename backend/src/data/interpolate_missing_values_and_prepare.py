@@ -27,7 +27,7 @@ def interpolate_missing_values(df: pd.DataFrame, column_name):
     Возвращает:
     - df_filtered (pd.DataFrame): Интерполированные данные
     """
-    
+
     # Определение последней даты, для заполнения графика интерполяцией
     last_date = df['date'].max()
 
@@ -70,9 +70,8 @@ def prepare_data_for_prophet(df: pd.DataFrame):
     df = df.sort_values('ds')
     df = df.reset_index(drop=True)
 
-    # Перенес сохранение в get_metrics.py def save_metrics
     # Сохранение DataFrame df в файл data/df.csv
-    # df_path = config['preprocessing']['df_path']
-    # df.to_csv(df_path, index=False)
-    
+    output_df_path = config['preprocessing']['df_path']
+    df.to_csv(output_df_path, index=False)
+
     return df

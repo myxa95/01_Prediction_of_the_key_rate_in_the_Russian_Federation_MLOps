@@ -42,4 +42,8 @@ def get_dataset(cfg):
     df['Дата'] = pd.to_datetime(df['Дата'], dayfirst=True)
     df.columns = ['date', 'key_rate']
 
+    # Сохранение DataFrame df в файл data/df.csv
+    output_df_path = config['preprocessing']['df_path']
+    df.to_csv(output_df_path, index=False)
+
     return df
