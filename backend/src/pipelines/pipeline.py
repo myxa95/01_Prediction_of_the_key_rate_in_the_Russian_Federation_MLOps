@@ -7,11 +7,11 @@ import os
 import json
 import yaml
 
-from train.train import train_model, optimize_prophet_hyperparameters
-from data.get_data import get_dataset
-from data.interpolate_missing_values_and_prepare import interpolate_missing_values
-from data.prepare_data_for_prophet import prepare_data_for_prophet
-from data.split_dataset import split_dataset
+from ..train.train import train_model, optimize_prophet_hyperparameters, generate_forecast
+from ..data.get_data import get_dataset
+from ..data.interpolate_missing_values_and_prepare import interpolate_missing_values
+from ..data.prepare_data_for_prophet import prepare_data_for_prophet
+from ..data.split_dataset import split_dataset
 
 def pipeline_training(config_path: str):
     """
@@ -47,6 +47,8 @@ def pipeline_training(config_path: str):
     study = optimize_prophet_hyperparameters(df_train, **training_config)
     # Обучение на лучших параметрах
     reg = train_model(df=df_train, **study)
+    # Создание DataFrame с прогнозом
+    df_forecast = generate_forecast(reg, training_config['pred_days_forecast'])
 
     # Сохранение модели и параметров
     with open(training_config['model_path'], 'w', encoding='utf-8') as model_file:

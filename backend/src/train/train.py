@@ -8,6 +8,7 @@
 import os
 import json
 import logging
+import joblib
 import numpy as np
 import optuna
 import pandas as pd
@@ -16,25 +17,26 @@ import yaml
 from prophet import Prophet
 from prophet.diagnostics import cross_validation
 
-CONFIG_PATH = '../../../config/params.yml'
+CONFIG_PATH = '../config/params.yml'
+
 with open(CONFIG_PATH, encoding='utf-8') as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
 data_path = config['train']['data_path']
 
 # Чтение DataFrame df_train в файл data/df_train.csv
-train_path = config['preprocessing']['train_path']
+train_path = config['train']['train_path']
 df_train = pd.read_csv(train_path)
 
 # Чтение DataFrame df_test в файл data/df_test.csv
-test_path = config['preprocessing']['test_path']
+test_path = config['train']['test_path']
 df_test = pd.read_csv(test_path)
 
-def optimize_prophet_hyperparameters(df_train: pd.DataFrame, model_path, params_path, config):
+def optimize_prophet_hyperparameters(train_data: pd.DataFrame, config):
     """
     Функция оптимизации гиперпараметров модели Prophet.
 
     Параметры:
-    - df_train (pd.DataFrame): Данные для обучения модели.
+    - train_data (pd.DataFrame): Данные для обучения модели.
     - model_path (str): Путь к директории, где будет сохранена лучшая модель.
     - params_path (str): Путь к директории, где будут сохранены лучшие параметры.
     - config (dict): Словарь с конфигурацией.
@@ -42,6 +44,8 @@ def optimize_prophet_hyperparameters(df_train: pd.DataFrame, model_path, params_
     Возвращает:
     - prophet_best_params (dict): Лучшие параметры модели Prophet.
     """
+
+    model = None  # Инициализация переменной model
 
     # Определите целевую функцию для оптимизации
     def objective(trial):
@@ -59,15 +63,16 @@ def optimize_prophet_hyperparameters(df_train: pd.DataFrame, model_path, params_
         )
 
         # Создайте модель Prophet с гиперпараметрами
+        nonlocal model  # Указываем, что используем переменную из внешней области
         model = Prophet(
             changepoint_prior_scale=changepoint_prior_scale,
             seasonality_prior_scale=seasonality_prior_scale,
             holidays_prior_scale=holidays_prior_scale,
             seasonality_mode=seasonality_mode,
-        )
+            )
 
         # Обучите модель
-        model.fit(df_train)
+        model.fit(train_data)
 
         # Выполните кросс-валидацию
         cv_results = cross_validation(
@@ -85,54 +90,26 @@ def optimize_prophet_hyperparameters(df_train: pd.DataFrame, model_path, params_
 
         return score
 
-    # Проверка, существует ли сохраненная модель и лучшие параметры
-    best_model_file = os.path.join(model_path, "prophet_best_model.json")
-    best_params_file = os.path.join(params_path, "prophet_best_params.json")
-    prophet_best_params = None
-    if os.path.exists(best_model_file) and os.path.exists(best_params_file):
-        print("Модель и параметры уже сохранены.")
-        with open(best_model_file, "r") as f:
-            prophet_best_model = json.load(f)
-        with open(best_params_file, "r") as f:
-            prophet_best_params = json.load(f)
-        print("Лучшие параметры:", prophet_best_params)
-    else:
-        print("Модель или параметры не сохранены, выполняем поиск гиперпараметров")
-        # Выполнение поиска гиперпараметров с помощью Optuna
-        study = optuna.create_study(direction="minimize")
-        best_score = float("-inf")
-        logging.getLogger("cmdstanpy").setLevel(logging.ERROR)
-        study.optimize(
-            objective,
-            n_trials=config["train"]["N_TRIALS"],
-            timeout=config["train"]["TIMEOUT"],
-        )
-        prophet_best_params = study.best_params
-        # Сохранение модели и лучших параметров
-        with open(best_model_file, "w") as f:
-            json.dump(prophet_best_params, f, indent=4)
-        with open(best_params_file, "w") as f:
-            json.dump(study.best_params, f, indent=4)
-        print("Модель и параметры сохранены")
-        print("Лучшие параметры:", study.best_params)
+    # Выполнение поиска гиперпараметров с помощью Optuna
+    study = optuna.create_study(direction="minimize")
+    best_score = float("-inf")
+    logging.getLogger("cmdstanpy").setLevel(logging.ERROR)
+    study.optimize(objective,
+                   n_trials=config["train"]["N_TRIALS"],
+                   timeout=config["train"]["TIMEOUT"],
+                   )
+    
+    # Сохранение модели
+    with open(config['train']['model_path'], "wb") as f:
+        joblib.dump(model, f)
+    # Сохранение лучших параметров
+    with open(config['train']['params_path'], "w", encoding='utf-8') as f:
+        json.dump(study.best_params, f, indent=4)
+    print("Модель и параметры сохранены")
+    print("Лучшие параметры:", study.best_params)
+    print("Лучшее значение:", study.best_value)
 
-    return prophet_best_params
-
-def generate_forecast(model, pred_days):
-    """
-    Генерирует прогноз на заданное количество дней вперед.
-
-    Параметры:
-    - model: модель, используемая для прогнозирования
-    - pred_days: количество дней, на которое нужно сделать прогноз
-
-    Возвращает:
-    - forecast: DataFrame с прогнозом
-    """
-    future = model.make_future_dataframe(periods=pred_days, freq="D")
-    forecast = model.predict(future)
-    return forecast
-
+    return study.best_params
 
 def train_model(df: pd.DataFrame, **kwargs):
     """
@@ -148,3 +125,19 @@ def train_model(df: pd.DataFrame, **kwargs):
     model.fit(df)
 
     return model
+
+def generate_forecast(model, pred_days):
+    """
+    Генерирует прогноз на заданное количество дней вперед.
+
+    Параметры:
+    - model: модель, используемая для прогнозирования
+    - pred_days: количество дней, на которое нужно сделать прогноз
+
+    Возвращает:
+    - forecast: DataFrame с прогнозом
+    """
+    future = model.make_future_dataframe(periods=pred_days, freq="D")
+    forecast = model.predict(future)
+
+    return forecast

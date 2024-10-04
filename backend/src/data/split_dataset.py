@@ -7,7 +7,7 @@
 import yaml
 import pandas as pd
 
-CONFIG_PATH = '../../../config/params.yml'
+CONFIG_PATH = '../config/params.yml'
 with open(CONFIG_PATH, encoding='utf-8') as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
 data_path = config['train']['data_path']

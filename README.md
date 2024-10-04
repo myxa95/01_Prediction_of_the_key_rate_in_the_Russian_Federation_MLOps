@@ -30,3 +30,22 @@
 Jupyter ноутбуки, в которых описана техническая часть: построение моделей, обучение и тестирование
 - **report** <br>
 Сохраненные лучше параметры после подбора параметров при помощи Optuna, сохранение метрик.
+
+## Команды для запуска FastAPI
+-   cd backend
+-   uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+Доступ к FastAPI по адресу: http://localhost:8000/docs
+
+- убить процесс по ID
+lsof -i:8000 | Get-NetTCPConnection -LocalPort 8000 | Select-Object -Property OwningProcess
+kill -9 process_id | Stop-Process -Id process_id -Force
+
+- убить все процессы
+for pid in $(ps -ef | grep "uvicorn main:app" | awk '{print $2}'); do kill -9 $pid; done
+Get-Process | Where-Object { $_.ProcessName -eq "uvicorn" } | Stop-Process -Force
+
+## Команды для запуска Streamlit
+-   cd frontend
+-   streamlit run app.py
+Доступ к Streamlit осуществляется по адресу: http://localhost:8501/
+
