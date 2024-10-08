@@ -4,21 +4,19 @@ parsing:
 
 preprocessing:
   pred_days: 0.15
-  random_sate: 42
   drop_trash: 
-  train_path: '../../../data/df_train.csv'
-  test_path: '../../../data/df_test.csv'
+  train_path: '../data/df_train.csv'
+  test_path: '../data/df_test.csv'
   df_path: '../data/df.csv'
   
 train:
-  random_sate: 42
   pred_days_forecast: 180
   backend_path: '../backend/src/data'
   data_path: '../data'
-  model_path: '../../../models/prophet_best_model.joblib'
+  model_path: '../models/prophet_best_model.joblib'
   study_path: '../models'
   metrics_path: '../report/metrics.json'
-  params_path: '../../../report/prophet_best_params.json'
+  params_path: '../report/prophet_best_params.json'
   train_path: '../data/df_train.csv'
   test_path: '../data/df_test.csv'
   df_path: '../data/df.csv'

@@ -23,7 +23,7 @@ def get_dataset(cfg):
     Возвращает:
     pd.DataFrame: DataFrame, содержащий спарсенные данные ключевой ставки.
     """
-    url = cfg['parsing']["URL"] + date.today().strftime('%d.%m.%Y')
+    url = cfg["URL"] + date.today().strftime('%d.%m.%Y')
     try:
         response = requests.get(url, timeout=30)
         response.raise_for_status()

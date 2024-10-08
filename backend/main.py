@@ -29,5 +29,31 @@ def welcome():
     """
     return {"message": "Hello World"}
 
+@app.post("/train")
+def train():
+    """
+    Train model
+    return: None
+    """
+    pipeline_training(config_path=CONFIG_PATH)
+    return {"message": "Model trained"}
+
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    import signal
+    import sys
+
+    def signal_handler(sig, frame):
+        print('Exiting gracefully...')
+        sys.exit(0)
+
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
+
+    try:
+        uvicorn.run(app, host="127.0.0.1", port=8000)
+    except Exception as e:
+        print(f"Error: {e}")
+
+
+# if __name__ == "__main__":
+#     uvicorn.run(app, host="127.0.0.1", port=8000)

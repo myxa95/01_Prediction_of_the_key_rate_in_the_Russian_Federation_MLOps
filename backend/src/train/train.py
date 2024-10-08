@@ -44,6 +44,9 @@ def optimize_prophet_hyperparameters(train_data: pd.DataFrame, config):
     Возвращает:
     - prophet_best_params (dict): Лучшие параметры модели Prophet.
     """
+    config_path = '../config/params.yml'
+    with open(config_path, encoding='utf-8') as file:
+        config = yaml.load(file, Loader=yaml.FullLoader)
 
     model = None  # Инициализация переменной model
 

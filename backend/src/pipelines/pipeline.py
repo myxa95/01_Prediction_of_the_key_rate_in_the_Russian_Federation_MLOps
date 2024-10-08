@@ -7,11 +7,11 @@ import os
 import json
 import yaml
 
-from ..train.train import train_model, optimize_prophet_hyperparameters, generate_forecast
-from ..data.get_data import get_dataset
-from ..data.interpolate_missing_values_and_prepare import interpolate_missing_values
-from ..data.prepare_data_for_prophet import prepare_data_for_prophet
-from ..data.split_dataset import split_dataset
+from src.train.train import train_model, optimize_prophet_hyperparameters, generate_forecast
+from src.data.get_data import get_dataset
+from src.data.interpolate_missing_values_and_prepare import interpolate_missing_values
+from src.data.prepare_data_for_prophet import prepare_data_for_prophet
+from src.data.split_dataset import split_dataset
 
 def pipeline_training(config_path: str):
     """
@@ -33,10 +33,10 @@ def pipeline_training(config_path: str):
 
     preprocessing_config = config['preprocessing']
     training_config = config['train']
-    parcing_config = config['parsing']
+    parsing_config = config['parsing']
 
     # Получение данных с сайта ЦБ РФ
-    train_data = get_dataset(cfg=parcing_config["URL"])
+    train_data = get_dataset(cfg=parsing_config)
     # Интерполяция пропущенных значений
     train_data = interpolate_missing_values(train_data, 'key_rate')
     # Подготовка данных для Prophet
@@ -44,15 +44,10 @@ def pipeline_training(config_path: str):
     # Разделение на обучающую и тестовую выборки
     df_train, df_test = split_dataset(train_data, config)
     # Поиск оптимальных параметров
-    study = optimize_prophet_hyperparameters(df_train, **training_config)
+    study = optimize_prophet_hyperparameters(df_train, training_config)
     # Обучение на лучших параметрах
     reg = train_model(df=df_train, **study)
     # Создание DataFrame с прогнозом
     df_forecast = generate_forecast(reg, training_config['pred_days_forecast'])
 
-    # Сохранение модели и параметров
-    with open(training_config['model_path'], 'w', encoding='utf-8') as model_file:
-        json.dump(reg, model_file)
-
-    with open(training_config['params_path'], 'w', encoding='utf-8') as params_file:
-        json.dump(study, params_file)
+    #дописать код для прогнозирования будущих ставок
