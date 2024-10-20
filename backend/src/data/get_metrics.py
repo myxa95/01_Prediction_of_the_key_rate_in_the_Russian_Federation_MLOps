@@ -72,19 +72,65 @@ def get_metrics(y_test: np.ndarray,
 
     return df_metrics
 
+# def save_metrics(df_metrics: pd.DataFrame, model: object, metrics_path: str):
+#     """
+#     Сохранение метрик в файл
+#     """
+#     df_metrics['date'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+#     df_metrics.to_json(metrics_path, orient='records', lines=True, mode='a')
+#     with open(metrics_path, 'w', encoding='utf-8') as file:
+#         json.dump(df_metrics, file)
+
+# def load_metrics(metrics_path: str):
+#     """
+#     Загрузка метрик из файла
+#     """
+#     with open(metrics_path, 'r', encoding='utf-8') as file:
+#         df_metrics = json.load(file)
+#     return df_metrics
+
 def save_metrics(df_metrics: pd.DataFrame, model: object, metrics_path: str):
     """
     Сохранение метрик в файл
     """
     df_metrics['date'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    df_metrics.to_json(metrics_path, orient='records', lines=True, mode='a')
-    with open(metrics_path, 'w') as file:
-        json.dump(df_metrics, file)
+    
+    # Преобразование DataFrame в словарь для сериализации
+    metrics_dict = df_metrics.to_dict(orient='records')
+    
+    # Загрузка существующих метрик, если файл существует
+    existing_metrics = []
+    try:
+        with open(metrics_path, 'r', encoding='utf-8') as file:
+            if file.readable():
+                file.seek(0)  # Вернуться в начало файла
+                content = file.read()
+                if content:  # Проверка на пустоту
+                    existing_metrics = json.loads(content)
+    except FileNotFoundError:
+        existing_metrics = []  # Если файл не найден, создаем пустой список
+
+    # Объединение существующих и новых метрик
+    all_metrics = existing_metrics + metrics_dict
+    
+    # Сохранение всех метрик в файл
+    with open(metrics_path, 'w', encoding='utf-8') as file:
+        json.dump(all_metrics, file)  # Сохранение в JSON
 
 def load_metrics(metrics_path: str):
     """
     Загрузка метрик из файла
     """
-    with open(metrics_path, 'r') as file:
-        df_metrics = json.load(file)
+    try:
+        with open(metrics_path, 'r', encoding='utf-8') as file:
+            content = file.read()
+            if content:  # Проверка на пустоту
+                df_metrics = json.loads(content)
+            else:
+                df_metrics = []  # Если файл пуст, возвращаем пустой список
+    except FileNotFoundError:
+        df_metrics = []  # Если файл не найден, возвращаем пустой список
+    except json.JSONDecodeError:
+        df_metrics = []  # Если произошла ошибка декодирования, возвращаем пустой список
+
     return df_metrics

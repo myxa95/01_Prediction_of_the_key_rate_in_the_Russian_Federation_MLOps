@@ -5,7 +5,6 @@
 
 import warnings
 import optuna
-import pandas as pd
 
 import uvicorn
 from fastapi import FastAPI
@@ -13,6 +12,8 @@ from fastapi import File
 from pydantic import BaseModel
 
 from src.pipelines.pipeline import pipeline_training
+from src.data.get_metrics import get_metrics, save_metrics, load_metrics
+from src.data.get_data import get_dataset
 
 warnings.filterwarnings('ignore')
 optuna.logging.set_verbosity(optuna.logging.WARNING)
@@ -32,17 +33,19 @@ def welcome():
 @app.post("/train")
 def train():
     """
-    Train model
+    Train model, logging metrics
     return: None
     """
     pipeline_training(config_path=CONFIG_PATH)
-    return {"message": "Model trained"}
+    metrics = load_metrics(metrics_path=CONFIG_PATH)
+    return {"message": "Model trained", "metrics": metrics}
 
 if __name__ == "__main__":
     import signal
     import sys
 
     def signal_handler(sig, frame):
+        """Обработчик сигнала для корректного завершения программы."""
         print('Exiting gracefully...')
         sys.exit(0)
 

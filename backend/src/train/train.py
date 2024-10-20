@@ -5,7 +5,6 @@
 Версия: 1.0
 """
 
-import os
 import json
 import logging
 import joblib
@@ -22,6 +21,10 @@ CONFIG_PATH = '../config/params.yml'
 with open(CONFIG_PATH, encoding='utf-8') as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
 data_path = config['train']['data_path']
+
+# Чтение DataFrame df в файл data/df.csv
+df_path = config['preprocessing']['df_path']
+df = pd.read_csv(df_path)
 
 # Чтение DataFrame df_train в файл data/df_train.csv
 train_path = config['train']['train_path']
@@ -140,7 +143,22 @@ def generate_forecast(model, pred_days):
     Возвращает:
     - forecast: DataFrame с прогнозом
     """
+
     future = model.make_future_dataframe(periods=pred_days, freq="D")
-    forecast = model.predict(future)
+    forecast = model.predict(df_test)
 
     return forecast
+
+# # Поиск оптимальных параметров
+# study = optimize_prophet_hyperparameters(df_train, config)
+# # Обучение на лучших параметрах
+# reg = train_model(df=df_train, **study)
+
+# # Период, который надо отрезать и предсказать (проверка модели)
+# pred_days = int(df.shape[0]*config['parsing']['pred_days'])
+# # Создание DataFrame с прогнозом
+# df_forecast = generate_forecast(reg, pred_days)
+
+# print(df_train.shape)
+# print(df_test.shape)
+# print(df_forecast.shape)

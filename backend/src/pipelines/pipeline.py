@@ -3,8 +3,6 @@
 Версия: 1.0
 """
 
-import os
-import json
 import yaml
 
 from src.train.train import train_model, optimize_prophet_hyperparameters, generate_forecast
@@ -12,6 +10,7 @@ from src.data.get_data import get_dataset
 from src.data.interpolate_missing_values_and_prepare import interpolate_missing_values
 from src.data.prepare_data_for_prophet import prepare_data_for_prophet
 from src.data.split_dataset import split_dataset
+from src.data.get_metrics import get_metrics, save_metrics
 
 def pipeline_training(config_path: str):
     """
@@ -31,7 +30,6 @@ def pipeline_training(config_path: str):
     with open(config_path, encoding='utf-8') as file:
         config = yaml.load(file, Loader=yaml.FullLoader)
 
-    preprocessing_config = config['preprocessing']
     training_config = config['train']
     parsing_config = config['parsing']
 
@@ -49,5 +47,8 @@ def pipeline_training(config_path: str):
     reg = train_model(df=df_train, **study)
     # Создание DataFrame с прогнозом
     df_forecast = generate_forecast(reg, training_config['pred_days_forecast'])
-
+    # Получение метрик после обучения
+    metrics = get_metrics(y_test=df_test['y'], y_pred=df_forecast['yhat'], name='Prophet_Optuna')
+    # Сохранение метрик
+    save_metrics(metrics, reg, training_config['metrics_path'])
     #дописать код для прогнозирования будущих ставок
