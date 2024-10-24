@@ -10,14 +10,14 @@ from src.data.get_data import get_dataset
 from src.data.interpolate_missing_values_and_prepare import interpolate_missing_values
 from src.data.prepare_data_for_prophet import prepare_data_for_prophet
 from src.data.split_dataset import split_dataset
-from src.data.get_metrics import get_metrics, save_metrics
+from src.data.get_metrics import get_dict_metrics, save_dict_metrics
 
 def pipeline_training(config_path: str):
     """
     Получение данных с сайта ЦБ РФ,
     интерполяция пропущенных значений,
     разделение на обучающую и тестовую выборки,
-    создание признаков,
+    поиск лучших параметров с Optuna,
     тренировка модели Prophet.
 
     Параметры:
@@ -41,6 +41,14 @@ def pipeline_training(config_path: str):
     train_data = prepare_data_for_prophet(train_data)
     # Разделение на обучающую и тестовую выборки
     df_train, df_test = split_dataset(train_data, config)
+    # Обучение базовой модели
+    baseline_model = train_model(df=df_train)
+    # Создание DataFrame с прогнозом
+    df_forecast = generate_forecast(baseline_model, training_config['pred_days_forecast'])
+    # Получение метрик после обучения
+    dict_metrics = get_dict_metrics(y_test=df_test['y'], y_pred=df_forecast['yhat'], name='Prophet_Baseline')
+    # Сохранение метрик
+    save_dict_metrics(dict_metrics, training_config['dict_metrics_path'])
     # Поиск оптимальных параметров
     study = optimize_prophet_hyperparameters(df_train, training_config)
     # Обучение на лучших параметрах
@@ -48,7 +56,7 @@ def pipeline_training(config_path: str):
     # Создание DataFrame с прогнозом
     df_forecast = generate_forecast(reg, training_config['pred_days_forecast'])
     # Получение метрик после обучения
-    metrics = get_metrics(y_test=df_test['y'], y_pred=df_forecast['yhat'], name='Prophet_Optuna')
+    dict_metrics = get_dict_metrics(y_test=df_test['y'], y_pred=df_forecast['yhat'], name='Prophet_Optuna')
     # Сохранение метрик
-    save_metrics(metrics, reg, training_config['metrics_path'])
-    #дописать код для прогнозирования будущих ставок
+    save_dict_metrics(dict_metrics, training_config['dict_metrics_path'])
+

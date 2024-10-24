@@ -16,6 +16,7 @@ train:
   model_path: '../models/prophet_best_model.joblib'
   study_path: '../models'
   metrics_path: '../report/metrics.json'
+  dict_metrics_path: '../report/dict_metrics.json'
   params_path: '../report/prophet_best_params.json'
   train_path: '../data/df_train.csv'
   test_path: '../data/df_test.csv'

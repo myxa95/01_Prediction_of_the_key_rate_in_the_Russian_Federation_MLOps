@@ -149,6 +149,7 @@ def generate_forecast(model, pred_days):
 
     return forecast
 
+# # ДЛЯ ТЕСТА
 # # Поиск оптимальных параметров
 # study = optimize_prophet_hyperparameters(df_train, config)
 # # Обучение на лучших параметрах
@@ -159,6 +160,8 @@ def generate_forecast(model, pred_days):
 # # Создание DataFrame с прогнозом
 # df_forecast = generate_forecast(reg, pred_days)
 
-# print(df_train.shape)
-# print(df_test.shape)
-# print(df_forecast.shape)
+# print('df:', df.shape)
+# print('df_train+df_test:', len(df_test)+len(df_train))
+# print('df_train:', df_train.shape)
+# print('df_test:', df_test.shape)
+# print('df_forecast:', df_forecast.shape)
