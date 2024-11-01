@@ -31,7 +31,7 @@ def plot_features(data: pd.DataFrame):
     ax[1].set_xlabel('День недели')
     ax[1].set_ylabel('Значение ставки')
 
-    return plt.show()
+    return fig, ax
 
 
 def plot_interpolate(df: pd.DataFrame, df_filtered: pd.DataFrame):
@@ -54,4 +54,35 @@ def plot_interpolate(df: pd.DataFrame, df_filtered: pd.DataFrame):
     ax.legend(loc='best')
     ax.grid(True)
 
-    return plt.show()
+    return fig, ax
+
+
+def plot_key_rate(df: pd.DataFrame):
+    """
+    Визуализация графика курса ключевой ставки ЦБ РФ и графика распределения.
+
+    Параметры:
+    df (pa.DataFrame): Данные о ключевой ставке.
+
+    Возвращает:
+    fig, ax: Объекты графиков для дальнейшего использования.
+    """
+    # Смотрим график курса ключевой ставки ЦБ РФ и график распределения
+    fig, ax = plt.subplots(1, 2, figsize=(15, 5))
+
+    sns.set_theme(style="whitegrid", palette="Accent")
+
+    sns.lineplot(x='date', y='key_rate', data=df, label='Ставка рефинансирования ЦБ РФ', ax=ax[0])
+    ax[0].set_xlabel('График ставки рефинансирования РФ')
+    ax[0].set_ylabel('Значение ставки')
+    ax[0].legend(loc='best')
+    ax[0].grid(True)
+
+    sns.kdeplot(x=df['key_rate'], ax=ax[1], fill=True)
+    ax[1].grid(True)
+    ax[1].set_xlabel('График распределения ставки')
+    ax[1].set_ylabel('Плотность вероятности')
+
+    plt.show()
+
+    return fig, ax

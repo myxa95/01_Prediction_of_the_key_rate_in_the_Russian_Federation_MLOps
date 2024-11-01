@@ -44,19 +44,26 @@ def pipeline_training(config_path: str):
     # Обучение базовой модели
     baseline_model = train_model(df=df_train)
     # Создание DataFrame с прогнозом
-    df_forecast = generate_forecast(baseline_model, training_config['pred_days_forecast'])
+    df_forecast_baseline = generate_forecast(
+        baseline_model, training_config['pred_days_forecast']
+    )
     # Получение метрик после обучения
-    dict_metrics = get_dict_metrics(y_test=df_test['y'], y_pred=df_forecast['yhat'], name='Prophet_Baseline')
+    dict_metrics = get_dict_metrics(
+        y_test=df_test['y'], y_pred=df_forecast_baseline['yhat'], name='Prophet_Baseline'
+    )
     # Сохранение метрик
     save_dict_metrics(dict_metrics, training_config['dict_metrics_path'])
     # Поиск оптимальных параметров
     study = optimize_prophet_hyperparameters(df_train, training_config)
     # Обучение на лучших параметрах
-    reg = train_model(df=df_train, **study)
+    reg_model = train_model(df=df_train, **study)
     # Создание DataFrame с прогнозом
-    df_forecast = generate_forecast(reg, training_config['pred_days_forecast'])
+    df_forecast_optuna = generate_forecast(
+        reg_model, training_config['pred_days_forecast']
+    )
     # Получение метрик после обучения
-    dict_metrics = get_dict_metrics(y_test=df_test['y'], y_pred=df_forecast['yhat'], name='Prophet_Optuna')
+    dict_metrics = get_dict_metrics(
+        y_test=df_test['y'], y_pred=df_forecast_optuna['yhat'], name='Prophet_Optuna'
+    )
     # Сохранение метрик
     save_dict_metrics(dict_metrics, training_config['dict_metrics_path'])
-

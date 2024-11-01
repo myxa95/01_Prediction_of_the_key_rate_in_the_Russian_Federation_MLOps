@@ -46,6 +46,8 @@ Get-Process | Where-Object { $_.ProcessName -eq "uvicorn" } | Stop-Process -Forc
 
 ## Команды для запуска Streamlit
 -   cd frontend
--   streamlit run app.py
+-   streamlit run main.py
 Доступ к Streamlit осуществляется по адресу: http://localhost:8501/
-
+- убить все процессы
+for pid in $(ps -ef | grep "streamlit run" | awk '{print $2}'); do kill -9 $pid; done
+Get-Process | Where-Object { $_.ProcessName -eq "streamlit" } | Stop-Process -Force
