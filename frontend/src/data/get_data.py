@@ -3,10 +3,7 @@
 Версия: 1.0
 """
 
-from io import BytesIO
-import io
 from datetime import date
-from typing import Tuple, Dict
 import requests
 import pandas as pd
 import yaml

@@ -1,3 +1,7 @@
+"""
+Модуль для создания новых признаков из столбца datetime в pandas DataFrame.
+"""
+
 import pandas as pd
 from pandas import CategoricalDtype
 

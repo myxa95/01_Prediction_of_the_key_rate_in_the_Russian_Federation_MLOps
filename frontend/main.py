@@ -3,10 +3,10 @@
 Версия: 1.0
 """
 
-import os
 import yaml
 import streamlit as st
 from src.data.get_data import load_data, get_dataset
+from src.plotting.get_plot import plot_key_rate
 
 CONFIG_PATH = "../config/params.yml"
 
@@ -45,9 +45,20 @@ def exploratory():
         config = yaml.load(file, Loader=yaml.FullLoader)
 
     # load and write dataset
-    data = load_data(dataset_path=config["preprocessing"]["df_path"])
-    st.write(data.head())
+    # data = load_data(dataset_path=config["preprocessing"]["df_path"])
+    parsing_config = config['parsing']
+    data = get_dataset(cfg=parsing_config)
 
+    st.write(data[:-5])
+
+    # plotting with checkbox
+    current_rate = st.sidebar.checkbox("Текущий курс ставки рефинансирования ЦБ РФ")
+    features = st.sidebar.checkbox("")
+
+    if current_rate:
+        # st.pyplot(plot_key_rate(data))
+        fig, ax = plot_key_rate(data)
+        st.pyplot(fig)
 
 def main():
     """

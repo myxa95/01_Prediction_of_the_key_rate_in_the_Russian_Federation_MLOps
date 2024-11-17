@@ -83,6 +83,4 @@ def plot_key_rate(df: pd.DataFrame):
     ax[1].set_xlabel('График распределения ставки')
     ax[1].set_ylabel('Плотность вероятности')
 
-    plt.show()
-
     return fig, ax
