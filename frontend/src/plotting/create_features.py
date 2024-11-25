@@ -31,7 +31,7 @@ def create_features(data, col_datetime):
     data['month'] = data[col_datetime].dt.month_name().astype(cat_month)  # Месяц года
     data['year'] = data[col_datetime].dt.year  # Год
     data['quarter'] = data[col_datetime].dt.quarter  # Квартал года
-    data['date_offset'] = (data[col_datetime].dt.month * 100 + data[col_datetime].dt.day - 320) % 1300  # Пользовательский признак смещения даты
+    data['date_offset'] = (data[col_datetime].dt.month * 100 + data[col_datetime].dt.day - 320) % 1300  # Признак смещения даты
     data['season'] = data[col_datetime].dt.month.map({1: 'Winter', 2: 'Winter', 3: 'Spring', 4: 'Spring', 5: 'Spring', 6: 'Summer', 7: 'Summer', 8: 'Summer', 9: 'Autumn', 10: 'Autumn', 11: 'Autumn', 12: 'Winter'})  # Сезон года
 
     return data

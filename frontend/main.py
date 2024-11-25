@@ -6,7 +6,9 @@
 import yaml
 import streamlit as st
 from src.data.get_data import load_data, get_dataset
-from src.plotting.get_plot import plot_key_rate
+from src.data.interpolate_missing_values_and_prepare import interpolate_missing_values
+from src.plotting.get_plot import plot_key_rate, plot_features, plot_interpolate
+from src.plotting.create_features import create_features
 
 CONFIG_PATH = "../config/params.yml"
 
@@ -15,6 +17,7 @@ def main_page():
     """
     Страница с описанием проекта
     """
+
     st.image(
         "https://s0.rbk.ru/v6_top_pics/media/img/9/06/347286318883069.png",
         width=600,
@@ -44,21 +47,35 @@ def exploratory():
     with open(CONFIG_PATH, encoding='utf-8') as file:
         config = yaml.load(file, Loader=yaml.FullLoader)
 
-    # load and write dataset
-    # data = load_data(dataset_path=config["preprocessing"]["df_path"])
+    # load dataset
     parsing_config = config['parsing']
     data = get_dataset(cfg=parsing_config)
-
+    st.markdown("Последние курсы ставки рефинансирования ЦБ РФ:")
     st.write(data[:-5])
 
     # plotting with checkbox
     current_rate = st.sidebar.checkbox("Текущий курс ставки рефинансирования ЦБ РФ")
-    features = st.sidebar.checkbox("")
+    features = st.sidebar.checkbox("Созданные признаки из df")
+    interpolate = st.sidebar.checkbox("Фильтрация выбросов и интерполяция пропущенных значений")
 
     if current_rate:
-        # st.pyplot(plot_key_rate(data))
+        st.markdown("График текущего курса и распределение ставки:")
         fig, ax = plot_key_rate(data)
         st.pyplot(fig)
+
+    if features:
+        st.markdown("Признаки по сезонам и дням недели:")
+        features = create_features(data=data, col_datetime='date')
+        plotting = plot_features(features)
+        st.pyplot(plotting[0])
+
+    if interpolate:
+        st.markdown("Фильтрация выбросов при помощи IQR и интерполяция пропущенных значений")
+        df_interpolated = data.copy()
+        df_interpolated = interpolate_missing_values(df_interpolated, 'key_rate')
+        plotting = plot_interpolate(data, df_interpolated)
+        st.pyplot(plotting[0])
+        
 
 def main():
     """
