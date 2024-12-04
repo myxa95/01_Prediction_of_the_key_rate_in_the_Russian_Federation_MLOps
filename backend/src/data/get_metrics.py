@@ -107,20 +107,37 @@ def save_dict_metrics(dict_metrics: dict, dict_metrics_path: str):
     """
     Сохранение метрик в файл как массив
     """
-    # Загрузка существующих метрик, если файл существует
-    try:
-        with open(dict_metrics_path, 'r', encoding='utf-8') as file:
-            existing_metrics = json.load(file)
-    except FileNotFoundError:
-        existing_metrics = []
-
-    # Добавление новых метрик к существующим
-    dict_metrics['date'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')  # Добавление даты и времени
-    existing_metrics.append(dict_metrics)
-
-    # Сохранение обновленного массива метрик
+    # Очистка файла перед записью
     with open(dict_metrics_path, 'w', encoding='utf-8') as file:
-        json.dump(existing_metrics, file)
+        file.write('')
+
+    # Добавление новых метрик
+    dict_metrics['date'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')  # Добавление даты и времени
+
+    # Сохранение метрик в файл
+    with open(dict_metrics_path, 'a', encoding='utf-8') as file:
+        json.dump(dict_metrics, file)
+        file.write('\n')
+
+
+# def save_dict_metrics(dict_metrics: dict, dict_metrics_path: str):
+#     """
+#     Сохранение метрик в файл как массив
+#     """
+#     # Загрузка существующих метрик, если файл существует
+#     try:
+#         with open(dict_metrics_path, 'r', encoding='utf-8') as file:
+#             existing_metrics = json.load(file)
+#     except FileNotFoundError:
+#         existing_metrics = []
+
+#     # Добавление новых метрик к существующим
+#     dict_metrics['date'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')  # Добавление даты и времени
+#     existing_metrics.append(dict_metrics)
+
+#     # Сохранение обновленного массива метрик
+#     with open(dict_metrics_path, 'w', encoding='utf-8') as file:
+#         json.dump(existing_metrics, file)
 
 
 def load_dict_metrics(dict_metrics_path: str) -> dict:

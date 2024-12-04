@@ -46,7 +46,7 @@ def plot_interpolate(df: pd.DataFrame, df_filtered: pd.DataFrame):
     sns.set_theme(style="whitegrid", palette="Accent")
 
     sns.lineplot(x='date', y='key_rate', data=df, label='Оригинальные данные', ax=ax)
-    sns.lineplot(x='date', y='key_rate', data=df_filtered, label='Отфильтрованные данные', ax=ax)
+    sns.lineplot(x='date', y='key_rate', data=df_filtered, label='Интерполируемые данные', ax=ax)
 
     ax.set_xlabel('Год')
     ax.set_ylabel('Значение ставки')
@@ -82,5 +82,27 @@ def plot_key_rate(df: pd.DataFrame):
     ax[1].grid(True)
     ax[1].set_xlabel('График распределения ставки')
     ax[1].set_ylabel('Плотность вероятности')
+
+    return fig, ax
+
+def plot_train_test_split(df_train, df_test):
+    """
+    Отображает график с разделением train, test для наглядности.
+
+    Параметры:
+    df_train (pandas.DataFrame): Данные тренировочной выборки.
+    df_test (pandas.DataFrame): Данные тестовой выборки.
+    """
+    fig, ax = plt.subplots(figsize = (10, 5))
+
+    fig.set_figheight(5)
+    fig.set_figwidth(15)
+    df_train.set_index('date').plot(ax=ax, label= 'train', title='Визуальное разделение на тестовые и тренировочные данные')
+    df_test.set_index('date').plot(ax=ax, label='test')
+    ax.axvline(df_train['date'][-1:].values, ls='--', color='black')
+    ax.legend(['Тренировочные данные', 'Тестовые данные'])
+    ax.set_ylabel('Значение ставки')
+    ax.set_xlabel('Год')
+    plt.show()
 
     return fig, ax

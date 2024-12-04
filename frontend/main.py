@@ -5,10 +5,12 @@
 
 import yaml
 import streamlit as st
-from src.data.get_data import load_data, get_dataset
+from src.data.get_data import get_dataset
 from src.data.interpolate_missing_values_and_prepare import interpolate_missing_values
-from src.plotting.get_plot import plot_key_rate, plot_features, plot_interpolate
+from src.data.split_dataset import split_dataset
+from src.plotting.get_plot import plot_key_rate, plot_features, plot_interpolate, plot_train_test_split
 from src.plotting.create_features import create_features
+from src.train.training import start_training
 
 CONFIG_PATH = "../config/params.yml"
 
@@ -25,11 +27,19 @@ def main_page():
 
     st.markdown("# Описание проекта")
     st.title("Prediction of the key rate in the Russian Federation")
-    st.write(
-        """Анализ и прогнозирование ключевой ставки ЦБ РФ"""
-    )
+    st.write("Анализ и прогнозирование ключевой ставки ЦБ РФ")
+    st.write("Проект использует данные по ключевой ставке Банка России для прогнозирования ее значений в будущем с помощью модели Prophet.")
+    st.write("Основные шаги проекта:")
+    st.write("- Сбор исторических данных по ключевой ставке ЦБ РФ с официального сайта.")
+    st.write("- Предобработка данных: очистка, заполнение пропусков, преобразование в формат для модели.")
+    st.write("- Разделение данных на обучающую и тестовую выборки.")
+    st.write("- Обучение модели Prophet на обучающей выборке. Prophet использует аддитивную модель с трендом и сезонностью.")
+    st.write("- Оценка качества модели на тестовой выборке по метрикам RMSE, MAE, MAPE.")
+    st.write("- Использование лучшей модели для прогнозирования ключевой ставки на заданный период в будущем.")
+    st.write("- Анализ полученных прогнозов, сравнение с фактическими данными и решениями ЦБ РФ по ставке")
+    st.write("- Обучение модели Prophet на полной выборке и предсказание ставки на будущие периоды")
 
-    # Имена колонок
+    # colums names
     st.markdown(
         """
         ### Описание полей 
@@ -57,6 +67,7 @@ def exploratory():
     current_rate = st.sidebar.checkbox("Текущий курс ставки рефинансирования ЦБ РФ")
     features = st.sidebar.checkbox("Созданные признаки из df")
     interpolate = st.sidebar.checkbox("Фильтрация выбросов и интерполяция пропущенных значений")
+    plot_train_test = st.sidebar.checkbox("График с разделением на train, test")
 
     if current_rate:
         st.markdown("График текущего курса и распределение ставки:")
@@ -65,7 +76,7 @@ def exploratory():
 
     if features:
         st.markdown("Признаки по сезонам и дням недели:")
-        features = create_features(data=data, col_datetime='date')
+        features = create_features(data, col_datetime='date')
         plotting = plot_features(features)
         st.pyplot(plotting[0])
 
@@ -75,7 +86,44 @@ def exploratory():
         df_interpolated = interpolate_missing_values(df_interpolated, 'key_rate')
         plotting = plot_interpolate(data, df_interpolated)
         st.pyplot(plotting[0])
-        
+    
+    if plot_train_test:
+        st.markdown("График с разделением на train, test")
+        df_split = data.copy()
+        df_split = interpolate_missing_values(df_interpolated, 'key_rate')
+        df_train, df_test = split_dataset(df_split, config)
+        plotting = plot_train_test_split(df_train, df_test)
+        st.pyplot(plotting[0])
+
+def training():
+    """
+    Тренировка модели
+    """
+    st.markdown("# Training model Prophet")
+    # get params
+    with open(CONFIG_PATH, encoding='utf-8') as file:
+        config = yaml.load(file, Loader=yaml.FullLoader)
+    # endpoint
+    endpoint = config["endpoints"]["train"]
+
+    if st.button("Start training"):
+        start_training(config=config, endpoint=endpoint)
+
+# def prediction():
+#     """
+#     Получение предсказаний путем ввода данных
+#     """
+#     st.markdown("# Prediction")
+#     with open(CONFIG_PATH) as file:
+#         config = yaml.load(file, Loader=yaml.FullLoader)
+#     endpoint = config["endpoints"]["prediction_input"]
+#     unique_data_path = config["preprocessing"]["unique_values_path"]
+
+#     # проверка на наличие сохраненной модели
+#     if os.path.exists(config["train"]["model_path"]):
+#         evaluate_input(unique_data_path=unique_data_path, endpoint=endpoint)
+#     else:
+#         st.error("Сначала обучите модель")
 
 def main():
     """
@@ -84,6 +132,7 @@ def main():
     page_names_to_funcs = {
         "Описание проекта": main_page,
         "Exploratory data analysis": exploratory,
+        "Tain model Prophet": training,
 
     }
     selected_page = st.sidebar.selectbox("Выберите пункт", page_names_to_funcs.keys())

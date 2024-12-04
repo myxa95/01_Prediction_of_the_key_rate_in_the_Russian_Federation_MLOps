@@ -31,7 +31,5 @@ frontend:
   main_image: '../data/frontend/main_image.png'
 
 endpoints:
-  parser: 'http://fatsapi:8000/parser'
-  train: 'http://fastapi:8000/train'
-  prediction_test: 'http://fastapi:8000/prediction_test'
-  prediction_future: 'http://fastapi:8000/prediction_future'
+  # train: 'http://fastapi:8000/train'
+  train: 'http://localhost:8000/train'
