@@ -34,7 +34,7 @@ Jupyter ноутбуки, в которых описана техническа�
 ## Команды для запуска FastAPI
 -   cd backend
 -   uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-Доступ к FastAPI по адресу: http://localhost:8000/docs
+-   Доступ к FastAPI по адресу: http://localhost:8000/docs
 
 - убить процесс по ID
 lsof -i:8000 | Get-NetTCPConnection -LocalPort 8000 | Select-Object -Property OwningProcess
@@ -47,7 +47,7 @@ Get-Process | Where-Object { $_.ProcessName -eq "uvicorn" } | Stop-Process -Forc
 ## Команды для запуска Streamlit
 -   cd frontend
 -   streamlit run main.py
-Доступ к Streamlit осуществляется по адресу: http://localhost:8501/
-- убить все процессы
+-   Доступ к Streamlit осуществляется по адресу: http://localhost:8501/
+-   убить все процессы
 for pid in $(ps -ef | grep "streamlit run" | awk '{print $2}'); do kill -9 $pid; done
 Get-Process | Where-Object { $_.ProcessName -eq "streamlit" } | Stop-Process -Force
