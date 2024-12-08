@@ -3,7 +3,9 @@
 Версия: 1.0
 """
 
+import os
 import yaml
+import joblib
 
 from src.train.train import train_model, optimize_prophet_hyperparameters, generate_forecast
 from src.data.get_data import get_dataset
@@ -56,7 +58,7 @@ def pipeline_training(config_path: str):
     # Поиск оптимальных параметров
     study = optimize_prophet_hyperparameters(df_train, training_config)
     # Обучение на лучших параметрах
-    reg_model = train_model(df=df_train, **study)
+    reg_model = train_model(df=df_train, **study.best_params)
     # Создание DataFrame с прогнозом
     df_forecast_optuna = generate_forecast(
         reg_model, training_config['pred_days_forecast']
@@ -68,3 +70,10 @@ def pipeline_training(config_path: str):
     # Сохранение метрик
     save_dict_metrics(dict_metrics, training_config['metrics_path'])
     # save_dict_metrics(dict_metrics, training_config['dict_metrics_path'])
+
+    # Сохранение модели
+    joblib.dump(reg_model, os.path.join(training_config["model_path"]))
+    # Сохранение лучших параметров
+    joblib.dump(study, os.path.join(training_config["params_path"]))
+
+    print(f"Загруженный объект: {type(study)}")

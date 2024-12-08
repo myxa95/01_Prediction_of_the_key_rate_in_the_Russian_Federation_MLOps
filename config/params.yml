@@ -14,15 +14,14 @@ train:
   backend_path: '../backend/src/data'
   data_path: '../data'
   model_path: '../models/prophet_best_model.joblib'
-  study_path: '../models'
+  params_path: '../models/prophet_best_params.joblib'
   metrics_path: '../report/metrics.json'
   dict_metrics_path: '../report/dict_metrics.json'
-  params_path: '../report/prophet_best_params.json'
   train_path: '../data/df_train.csv'
   test_path: '../data/df_test.csv'
   df_path: '../data/df.csv'
   N_TRIALS: 1000
-  TIMEOUT: 18
+  TIMEOUT: 30
 
 evaluate:
   predict_path: ../data/check/test.csv

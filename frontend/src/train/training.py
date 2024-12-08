@@ -10,6 +10,7 @@ import joblib
 import requests
 import streamlit as st
 from optuna.visualization import plot_param_importances, plot_optimization_history
+import optuna
 
 
 def start_training(config: dict, endpoint: object) -> None:
@@ -59,8 +60,16 @@ def start_training(config: dict, endpoint: object) -> None:
 
     # plot study
     study = joblib.load(os.path.join(config["train"]["params_path"]))
-    fig_imp = plot_param_importances(study)
-    fig_history = plot_optimization_history(study)
+    print(f"Загруженный объект: {type(study)}")
+    if not isinstance(study, optuna.study.Study):
+        raise ValueError("Загруженный объект не является экземпляром optuna.study.Study")
 
-    st.plotly_chart(fig_imp, use_container_width=True)
-    st.plotly_chart(fig_history, use_container_width=True)
+    # Добавлена проверка на количество пробных запусков
+    if len(study.trials) > 1:
+        fig_imp = plot_param_importances(study)
+        fig_history = plot_optimization_history(study)
+
+        st.plotly_chart(fig_imp, use_container_width=True)
+        st.plotly_chart(fig_history, use_container_width=True)
+    else:
+        st.warning("Недостаточно пробных запусков для оценки важности параметров.")

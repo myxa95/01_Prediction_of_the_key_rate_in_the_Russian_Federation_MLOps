@@ -68,7 +68,7 @@ def optimize_prophet_hyperparameters(train_data: pd.DataFrame, config):
             "seasonality_mode", ["additive", "multiplicative"]
         )
 
-        # Создайте модель Prophet с гиперпараметрами
+        # модель Prophet с гиперпараметрами
         nonlocal model  # Указываем, что используем переменную из внешней области
         model = Prophet(
             changepoint_prior_scale=changepoint_prior_scale,
@@ -105,17 +105,17 @@ def optimize_prophet_hyperparameters(train_data: pd.DataFrame, config):
                    timeout=config["train"]["TIMEOUT"],
                    )
     
-    # Сохранение модели
-    with open(config['train']['model_path'], "wb") as f:
-        joblib.dump(model, f)
-    # Сохранение лучших параметров
-    with open(config['train']['params_path'], "w", encoding='utf-8') as f:
-        json.dump(study.best_params, f, indent=4)
+    # # Сохранение модели
+    # with open(config['train']['model_path'], "wb") as f:
+    #     joblib.dump(model, f)
+    # # Сохранение лучших параметров
+    # with open(config['train']['params_path'], "w", encoding='utf-8') as f:
+    #     json.dump(study.best_params, f, indent=4)
     print("Модель и параметры сохранены")
     print("Лучшие параметры:", study.best_params)
     print("Лучшее значение:", study.best_value)
 
-    return study.best_params
+    return study
 
 def train_model(df: pd.DataFrame, **kwargs):
     """
