@@ -30,7 +30,7 @@ def split_dataset(df: pd.DataFrame, config):
     df_train (pd.DataFrame): Обучающая выборка
     df_test (pd.DataFrame): Тестовая выборка
     """
-    df = df.sort_values(by=df.columns[0], ascending=True)
+    #df = df.sort_values(by=df.columns[0], ascending=True)
     pred_days = int(df.shape[0]*config['parsing']['pred_days'])
     df_train = df[:-pred_days]
     df_test = df[-pred_days:]

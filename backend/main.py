@@ -24,18 +24,18 @@ app = FastAPI()
 CONFIG_PATH = '../config/params.yml'
 
 
-@app.get("/Hello")
-def welcome():
-    """
-    Hello!
-    return: None
-    """
-    return {"message": "Hello World"}
+# @app.get("/Hello")
+# def welcome():
+#     """
+#     Hello!
+#     return: None
+#     """
+#     return {"message": "Hello World"}
 
-@app.post("/train")
-def train():
+@app.post("/train_test")
+def train_test():
     """
-    Train model, logging metrics
+    Train test model, logging metrics
     return: None
     """
     with open(CONFIG_PATH, encoding='utf-8') as file:

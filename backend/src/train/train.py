@@ -10,6 +10,7 @@ import logging
 import joblib
 import numpy as np
 import optuna
+from optuna.pruners import MedianPruner
 import pandas as pd
 import yaml
 
@@ -34,14 +35,46 @@ df_train = pd.read_csv(train_path)
 test_path = config['train']['test_path']
 df_test = pd.read_csv(test_path)
 
+def objective(trial, train_data: pd.DataFrame) -> float:
+    """
+    Целевая функция для оптимизации гиперпараметров Prophet с помощью Optuna.
+
+    Параметры:
+        trial (optuna.Trial): Объект пробного запуска Optuna
+        train_data (pd.DataFrame): Данные для обучения
+
+    Возвращает:
+        float: Значение MAE для оценки качества модели
+    """
+    try:
+        # Гиперпараметры для настройки
+        params = {
+            "changepoint_prior_scale": trial.suggest_float("changepoint_prior_scale", 0.001, 0.5),
+            "seasonality_prior_scale": trial.suggest_float("seasonality_prior_scale", 0.01, 10),
+            "holidays_prior_scale": trial.suggest_float("holidays_prior_scale", 0.01, 10),
+            "seasonality_mode": trial.suggest_categorical("seasonality_mode", ["additive", "multiplicative"]),
+            "changepoint_range": trial.suggest_float("changepoint_range", 0.8, 0.95),
+        }
+
+        # модель Prophet с гиперпараметрами
+        model = Prophet(**params)
+        model.fit(train_data)
+
+        # Кросс-валидация
+        cv_results = cross_validation(model, initial="730 days", period="180 days", horizon="30 days")
+        mae = np.mean(np.abs(cv_results["y"] - cv_results["yhat"]))
+
+        return mae
+    except Exception as e:
+        logging.error("Error in objective function: %s", str(e))
+        raise
+
 def optimize_prophet_hyperparameters(train_data: pd.DataFrame, config):
     """
     Функция оптимизации гиперпараметров модели Prophet.
 
     Параметры:
     - train_data (pd.DataFrame): Данные для обучения модели.
-    - model_path (str): Путь к директории, где будет сохранена лучшая модель.
-    - params_path (str): Путь к директории, где будут сохранены лучшие параметры.
     - config (dict): Словарь с конфигурацией.
 
     Возвращает:
@@ -51,73 +84,21 @@ def optimize_prophet_hyperparameters(train_data: pd.DataFrame, config):
     with open(config_path, encoding='utf-8') as file:
         config = yaml.load(file, Loader=yaml.FullLoader)
 
-    model = None  # Инициализация переменной model
-
-    # Определите целевую функцию для оптимизации
-    def objective(trial):
-        best_score = float("inf")
-        # Гиперпараметры для настройки
-        changepoint_prior_scale = trial.suggest_float(
-            "changepoint_prior_scale", 0.001, 0.5
-        )
-        seasonality_prior_scale = trial.suggest_float(
-            "seasonality_prior_scale", 0.01, 10
-        )
-        holidays_prior_scale = trial.suggest_float("holidays_prior_scale", 0.01, 10)
-        seasonality_mode = trial.suggest_categorical(
-            "seasonality_mode", ["additive", "multiplicative"]
-        )
-
-        # модель Prophet с гиперпараметрами
-        nonlocal model  # Указываем, что используем переменную из внешней области
-        model = Prophet(
-            changepoint_prior_scale=changepoint_prior_scale,
-            seasonality_prior_scale=seasonality_prior_scale,
-            holidays_prior_scale=holidays_prior_scale,
-            seasonality_mode=seasonality_mode,
-            )
-
-        # Обучите модель
-        model.fit(train_data)
-
-        # Выполните кросс-валидацию
-        cv_results = cross_validation(
-            model, initial="730 days", period="180 days", horizon="30 days"
-        )
-
-        # Расчет MAE
-        mae = np.mean(np.abs(cv_results["y"] - cv_results["yhat"]))
-
-        score = mae
-
-        # Обновляем best_score только если MAE лучше
-        if score < best_score:
-            best_score = score
-
-        return score
-
     # Выполнение поиска гиперпараметров с помощью Optuna
-    study = optuna.create_study(direction="minimize")
-    best_score = float("-inf")
+    study = optuna.create_study(direction="minimize", pruner=MedianPruner())
     logging.getLogger("cmdstanpy").setLevel(logging.ERROR)
-    study.optimize(objective,
+    study.optimize(lambda trial: objective(trial, train_data),
                    n_trials=config["train"]["N_TRIALS"],
                    timeout=config["train"]["TIMEOUT"],
                    )
     
-    # # Сохранение модели
-    # with open(config['train']['model_path'], "wb") as f:
-    #     joblib.dump(model, f)
-    # # Сохранение лучших параметров
-    # with open(config['train']['params_path'], "w", encoding='utf-8') as f:
-    #     json.dump(study.best_params, f, indent=4)
     print("Модель и параметры сохранены")
     print("Лучшие параметры:", study.best_params)
     print("Лучшее значение:", study.best_value)
 
     return study
 
-def train_model(df: pd.DataFrame, **kwargs):
+def train_model(data: pd.DataFrame, **kwargs):
     """
     Обучение модели Prophet на данных.
 
@@ -128,7 +109,7 @@ def train_model(df: pd.DataFrame, **kwargs):
         Обученная модель.
     """
     model = Prophet(**kwargs)
-    model.fit(df)
+    model.fit(data)
 
     return model
 
@@ -144,8 +125,14 @@ def generate_forecast(model, pred_days):
     - forecast: DataFrame с прогнозом
     """
 
-    future = model.make_future_dataframe(periods=pred_days, freq="D")
-    forecast = model.predict(df_test)
+
+    future = df_test[['ds']].copy()
+    future = pd.concat([future, model.make_future_dataframe(periods=pred_days, freq="D")], ignore_index=True)
+    forecast = model.predict(future)
+
+    # Ограничение прогнозируемых значений
+    # floor_value = 0 
+    # forecast['yhat'] = forecast['yhat'].clip(lower=floor_value)
 
     return forecast
 
@@ -153,15 +140,25 @@ def generate_forecast(model, pred_days):
 # # Поиск оптимальных параметров
 # study = optimize_prophet_hyperparameters(df_train, config)
 # # Обучение на лучших параметрах
-# reg = train_model(df=df_train, **study)
+# reg_model = train_model(df=df_train, **study.best_params)
 
 # # Период, который надо отрезать и предсказать (проверка модели)
 # pred_days = int(df.shape[0]*config['parsing']['pred_days'])
 # # Создание DataFrame с прогнозом
-# df_forecast = generate_forecast(reg, pred_days)
+# df_forecast = generate_forecast(reg_model, pred_days)
+# print('df_forecast_uncut:', df_forecast.shape)
 
+# # Отбор только прогнозируемых значений
+# df_forecast = df_forecast[-pred_days:]
+
+# print('pred_days', pred_days)
 # print('df:', df.shape)
 # print('df_train+df_test:', len(df_test)+len(df_train))
 # print('df_train:', df_train.shape)
 # print('df_test:', df_test.shape)
 # print('df_forecast:', df_forecast.shape)
+# print(df_test.head(5))
+# print(df_forecast.head(5))
+# print(df_test.tail(5))
+# print(df_forecast.tail(5))
+

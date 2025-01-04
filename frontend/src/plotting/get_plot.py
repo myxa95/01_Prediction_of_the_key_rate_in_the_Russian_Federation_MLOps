@@ -59,7 +59,7 @@ def plot_interpolate(df: pd.DataFrame, df_filtered: pd.DataFrame):
 
 def plot_key_rate(df: pd.DataFrame):
     """
-    Визуализация графика курса ключевой ставки ЦБ РФ и графика распределения.
+    Ви��уализация графика курса и графика распределения ключевой ставки ЦБ РФ.
 
     Параметры:
     df (pa.DataFrame): Данные о ключевой ставке.
@@ -106,3 +106,57 @@ def plot_train_test_split(df_train, df_test):
     plt.show()
 
     return fig, ax
+
+def plot_forecast(model: any, forecast: any) -> None:
+    """
+    Отображает график прогноза и компоненты модели.
+
+    Параметры:
+    model (модель): Модель, использованная для прогнозирования.
+    forecast (прогноз): Прогноз, полученный с помощью модели.
+
+    Возвращает:
+    None
+    """
+    # Смотрим график прогноза
+    fig, ax = plt.subplots(1)
+    model.plot(forecast, ax=ax)
+    plt.show()
+
+    # Смотрим тренд, годовые и сезонные признаки
+    fig, ax = plt.subplots(1)
+    model.plot_components(forecast)
+    plt.show()
+
+def plot_test_forecast(df_test: pd.DataFrame, df_forecast: pd.DataFrame) -> None:
+    """
+    Отображает график с данными тестовой выборки и прогнозом.
+
+    Параметры:
+    df_test (pandas.DataFrame): Данные тестовой выборки.
+    df_forecast (pandas.DataFrame): Прогнозные данные.
+    
+    Возвращает:
+    fig, ax: Объекты графиков для дальнейшего использования.
+    """
+    # Преобразование столбцов 'ds' в формат datetime
+    df_test['ds'] = pd.to_datetime(df_test['ds'])
+    df_forecast['ds'] = pd.to_datetime(df_forecast['ds'])
+
+    # Фильтрация df_forecast для получения последних значений, соответствующих df_test
+    df_forecast = df_forecast.tail(len(df_test))
+
+    fig, ax = plt.subplots()
+    
+    sns.lineplot(x='ds', y='y', data=df_test, label='Тестовые данные', ax=ax)
+    sns.lineplot(x='ds', y='yhat', data=df_forecast, label='Прогноз', ax=ax)
+    
+    ax.set_xlabel('Дата')
+    ax.set_ylabel('Значение ставки')
+    ax.set_title('Сравнение тестовых данных и прогноза')
+    ax.legend(loc='best')
+    ax.grid(True)
+    
+    return fig
+
+   

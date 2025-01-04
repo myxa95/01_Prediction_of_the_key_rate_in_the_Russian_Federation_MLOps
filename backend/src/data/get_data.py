@@ -47,6 +47,7 @@ def get_dataset(cfg):
     df.iloc[:, 1:] /= 100
     df['Дата'] = pd.to_datetime(df['Дата'], dayfirst=True)
     df.columns = ['date', 'key_rate']
+    df = df.sort_values(by='date').reset_index(drop=True)
 
     # Сохранение DataFrame df в файл data/df.csv
     output_df_path = config['preprocessing']['df_path']
@@ -66,3 +67,9 @@ def load_data(dataset_path: str) -> pd.DataFrame:
     """
 
     return pd.read_csv(dataset_path)
+
+
+# # ДЛЯ ТЕСТА
+# parsing_config = config['parsing']
+# dataset = get_dataset(cfg=parsing_config)
+# print(dataset)

@@ -43,30 +43,16 @@ def pipeline_training(config_path: str):
     train_data = prepare_data_for_prophet(train_data)
     # Разделение на обучающую и тестовую выборки
     df_train, df_test = split_dataset(train_data, config)
-    # # Обучение базовой модели
-    # baseline_model = train_model(df=df_train)
-    # # Создание DataFrame с прогнозом
-    # df_forecast_baseline = generate_forecast(
-    #     baseline_model, training_config['pred_days_forecast']
-    # )
-    # # Получение метрик после обучения
-    # dict_metrics = get_dict_metrics(
-    #     y_test=df_test['y'], y_pred=df_forecast_baseline['yhat'], name='Prophet_Baseline'
-    # )
-    # # Сохранение метрик
-    # save_dict_metrics(dict_metrics, training_config['dict_metrics_path'])
     # Поиск оптимальных параметров
     study = optimize_prophet_hyperparameters(df_train, training_config)
     # Обучение на лучших параметрах
-    reg_model = train_model(df=df_train, **study.best_params)
+    reg_model = train_model(data=df_train, **study.best_params)
     # Создание DataFrame с прогнозом
-    df_forecast_optuna = generate_forecast(
-        reg_model, training_config['pred_days_forecast']
-    )
+    df_forecast = generate_forecast(reg_model, training_config['pred_days_forecast'])
+    # Отбор только прогнозируемых значений
+    df_forecast = df_forecast[-len(df_test):]
     # Получение метрик после обучения
-    dict_metrics = get_dict_metrics(
-        y_test=df_test['y'], y_pred=df_forecast_optuna['yhat'], name='Prophet_Optuna'
-    )
+    dict_metrics = get_dict_metrics(y_test=df_test['y'], y_pred=df_forecast['yhat'], name='Prophet_Optuna')
     # Сохранение метрик
     save_dict_metrics(dict_metrics, training_config['metrics_path'])
     # save_dict_metrics(dict_metrics, training_config['dict_metrics_path'])
@@ -77,3 +63,12 @@ def pipeline_training(config_path: str):
     joblib.dump(study, os.path.join(training_config["params_path"]))
 
     print(f"Загруженный объект: {type(study)}")
+    print(df_train.shape)
+    print(df_test.shape)
+    print(df_forecast.shape)    
+    print(df_train.head(5))
+    print(df_train.tail(5))
+    print(df_test.head(5))
+    print(df_test.tail(5))
+    print(df_forecast.head(5))
+    print(df_forecast.tail(5))

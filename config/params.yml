@@ -1,9 +1,9 @@
 parsing:
-  pred_days: 0.15
+  pred_days: 0.10
   URL: 'https://www.cbr.ru/hd_base/keyrate/?UniDbQuery.Posted=True&UniDbQuery.From=17.09.2013&UniDbQuery.To='
 
 preprocessing:
-  pred_days: 0.15
+  pred_days: 0.10
   drop_trash: 
   train_path: '../data/df_train.csv'
   test_path: '../data/df_test.csv'
@@ -20,8 +20,8 @@ train:
   train_path: '../data/df_train.csv'
   test_path: '../data/df_test.csv'
   df_path: '../data/df.csv'
-  N_TRIALS: 1000
-  TIMEOUT: 30
+  N_TRIALS: 5
+  TIMEOUT: 1800
 
 evaluate:
   predict_path: ../data/check/test.csv
@@ -30,5 +30,7 @@ frontend:
   main_image: '../data/frontend/main_image.png'
 
 endpoints:
-  # train: 'http://fastapi:8000/train'
-  train: 'http://localhost:8000/train'
+  train_test: 'http://localhost:8000/train_test'
+  train_future: 'http://localhost:8000/train_future'
+  # train_test: 'http://fastapi:8000/train'
+  # train_future: 'http://fastapi:8000/train_future'
