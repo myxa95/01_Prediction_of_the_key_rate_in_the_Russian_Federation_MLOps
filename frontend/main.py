@@ -11,9 +11,10 @@ import pandas as pd
 from src.data.get_data import get_dataset
 from src.data.interpolate_missing_values_and_prepare import interpolate_missing_values
 from src.data.split_dataset import split_dataset
-from src.plotting.get_plot import plot_key_rate, plot_features, plot_interpolate, plot_train_test_split, plot_test_forecast
+from src.plotting.get_plot import plot_key_rate, plot_features, plot_interpolate, plot_train_test_split, plot_test_forecast, plot_future_forecast
 from src.plotting.create_features import create_features
-from src.train.training import start_training, generate_forecast
+from src.train.training import start_training, start_training_future, generate_forecast
+import time
 
 CONFIG_PATH = "../config/params.yml"
 
@@ -111,7 +112,11 @@ def training():
     endpoint = config["endpoints"]["train_test"]
 
     if st.button("Start training"):
+        start_time = time.time()
         start_training(config=config, endpoint=endpoint)
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        st.success(f"Модель обучена за {elapsed_time:.2f} секунд")
 
 def forecast_test_model():
     """
@@ -128,11 +133,12 @@ def forecast_test_model():
         st.success("Model loaded")
     else:
         st.error("Model not found")
-        return  # Добавлено для выхода из функции, если модель не найдена
+        return
 
     # Чтение DataFrame df_test в файл data/df_test.csv
     test_path = config['train']['test_path']
     df_test = pd.read_csv(test_path)
+
     # Создание DataFrame с прогнозом
     df_forecast = generate_forecast(reg_model, config['train']['pred_days_forecast'], df_test)
 
@@ -151,21 +157,62 @@ def forecast_test_model():
     fig = plot_test_forecast(df_test=df_test, df_forecast=df_forecast)
     st.pyplot(fig)
 
-# def prediction():
-#     """
-#     Получение предсказаний путем ввода данных
-#     """
-#     st.markdown("# Prediction")
-#     with open(CONFIG_PATH) as file:
-#         config = yaml.load(file, Loader=yaml.FullLoader)
-#     endpoint = config["endpoints"]["prediction_input"]
-#     unique_data_path = config["preprocessing"]["unique_values_path"]
+def training_future():
+    """
+    Тренировка модели
+    """
+    st.markdown("# Training test model Prophet future periods")
+    # get params
+    with open(CONFIG_PATH, encoding='utf-8') as file:
+        config = yaml.load(file, Loader=yaml.FullLoader)
+    # endpoint
+    endpoint = config["endpoints"]["train_future"]
 
-#     # проверка на наличие сохраненной модели
-#     if os.path.exists(config["train"]["model_path"]):
-#         evaluate_input(unique_data_path=unique_data_path, endpoint=endpoint)
-#     else:
-#         st.error("Сначала обучите модель")
+    if st.button("Start training"):
+        start_time = time.time()
+        start_training_future(config=config, endpoint=endpoint)
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        st.success(f"Модель обучена за {elapsed_time:.2f} секунд")
+
+def forecast_future_model():
+    """
+    График прогноза и компоненты модели с прогнозом на будущие периоды
+    """
+    st.markdown("# Plotting trained future model")
+    # get params
+    with open(CONFIG_PATH, encoding='utf-8') as file:
+        config = yaml.load(file, Loader=yaml.FullLoader)
+    # load model
+    model_path = config["train"]["model_path_future"]
+    if os.path.exists(model_path):
+        reg_model = joblib.load(model_path)
+        st.success("Model loaded")
+    else:
+        st.error("Model not found")
+        return
+
+    # Чтение DataFrame df в файл data/df.csv
+    df_path = config['train']['df_path']
+    df = pd.read_csv(df_path)
+
+    # Создание DataFrame с прогнозом
+    df_forecast = generate_forecast(reg_model, config['train']['pred_days_forecast'], df)
+
+    # График прогноза
+    st.markdown("# График прогноза")
+    model_course = reg_model.plot(df_forecast)
+    st.pyplot(model_course)
+
+    # Тренд, годовые и сезонные признаки
+    st.markdown("# Тренд, годовые и сезонные признаки")
+    model_trend = reg_model.plot_components(df_forecast)
+    st.pyplot(model_trend)
+
+    # График участка прогноза будущих периодов
+    st.markdown("# График участка прогноза будущих периодов")
+    fig = plot_future_forecast(df=df, df_forecast=df_forecast)
+    st.pyplot(fig)
 
 def main():
     """
@@ -176,6 +223,8 @@ def main():
         "Exploratory data analysis": exploratory,
         "Tain test model Prophet": training,
         "Forecast key rate and plot test model": forecast_test_model,
+        "Training test model Prophet future periods": training_future,
+        "Forecast key rate and plot future model": forecast_future_model
 
     }
     selected_page = st.sidebar.selectbox("Выберите пункт", page_names_to_funcs.keys())

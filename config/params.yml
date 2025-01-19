@@ -1,9 +1,9 @@
 parsing:
-  pred_days: 0.10
+  pred_days: 0.2
   URL: 'https://www.cbr.ru/hd_base/keyrate/?UniDbQuery.Posted=True&UniDbQuery.From=17.09.2013&UniDbQuery.To='
 
 preprocessing:
-  pred_days: 0.10
+  pred_days: 0.2
   drop_trash: 
   train_path: '../data/df_train.csv'
   test_path: '../data/df_test.csv'
@@ -20,11 +20,12 @@ train:
   train_path: '../data/df_train.csv'
   test_path: '../data/df_test.csv'
   df_path: '../data/df.csv'
-  N_TRIALS: 5
+  df_forecast: '../data/df_forecast.csv'
+  N_TRIALS: 20
   TIMEOUT: 1800
-
-evaluate:
-  predict_path: ../data/check/test.csv
+  model_path_future: '../models/prophet_best_model_future.joblib'
+  params_path_future: '../models/prophet_best_params_future.joblib'
+  df_forecast_future: '../data/df_forecast_future.csv'
 
 frontend:
   main_image: '../data/frontend/main_image.png'

@@ -53,7 +53,7 @@ def objective(trial, train_data: pd.DataFrame) -> float:
             "seasonality_prior_scale": trial.suggest_float("seasonality_prior_scale", 0.01, 10),
             "holidays_prior_scale": trial.suggest_float("holidays_prior_scale", 0.01, 10),
             "seasonality_mode": trial.suggest_categorical("seasonality_mode", ["additive", "multiplicative"]),
-            "changepoint_range": trial.suggest_float("changepoint_range", 0.8, 0.95),
+            # "changepoint_range": trial.suggest_float("changepoint_range", 0.8, 0.95),
         }
 
         # модель Prophet с гиперпараметрами

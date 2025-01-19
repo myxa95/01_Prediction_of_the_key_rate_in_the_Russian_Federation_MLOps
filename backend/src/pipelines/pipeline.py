@@ -20,7 +20,9 @@ def pipeline_training(config_path: str):
     интерполяция пропущенных значений,
     разделение на обучающую и тестовую выборки,
     поиск лучших параметров с Optuna,
-    тренировка модели Prophet.
+    тренировка модели Prophet,
+    сохранение модели,
+    сохранение параметров модели.
 
     Параметры:
         config_path (str): Путь к конфигурации.
@@ -62,13 +64,53 @@ def pipeline_training(config_path: str):
     # Сохранение лучших параметров
     joblib.dump(study, os.path.join(training_config["params_path"]))
 
-    print(f"Загруженный объект: {type(study)}")
-    print(df_train.shape)
-    print(df_test.shape)
-    print(df_forecast.shape)    
-    print(df_train.head(5))
-    print(df_train.tail(5))
-    print(df_test.head(5))
-    print(df_test.tail(5))
-    print(df_forecast.head(5))
-    print(df_forecast.tail(5))
+    # print(f"Загруженный объект: {type(study)}")
+    # print(df_train.shape)
+    # print(df_test.shape)
+    # print(df_forecast.shape)    
+    # print(df_train.head(5))
+    # print(df_train.tail(5))
+    # print(df_test.head(5))
+    # print(df_test.tail(5))
+    # print(df_forecast.head(5))
+    # print(df_forecast.tail(5))
+
+def pipeline_training_future(config_path: str):
+    """
+    Получение данных с сайта ЦБ РФ,
+    интерполяция пропущенных значений,
+    поиск лучших параметров с Optuna,
+    тренировка модели Prophet,
+    сохранение модели,
+    сохранение параметров модели.
+
+    Параметры:
+        config_path (str): Путь к конфигурации.
+
+    Возвращает:
+        None
+    """
+    # Загрузка конфигурации
+    with open(config_path, encoding='utf-8') as file:
+        config = yaml.load(file, Loader=yaml.FullLoader)
+
+    training_config = config['train']
+    parsing_config = config['parsing']
+
+    # Получение данных с сайта ЦБ РФ
+    train_data = get_dataset(cfg=parsing_config)
+    # Интерполяция пропущенных значений
+    train_data = interpolate_missing_values(train_data, 'key_rate')
+    # Подготовка данных для Prophet
+    train_data = prepare_data_for_prophet(train_data)
+    # Поиск оптимальных параметров
+    study = optimize_prophet_hyperparameters(train_data, training_config)
+    # Обучение на лучших параметрах
+    reg_model = train_model(data=train_data, **study.best_params)
+    # Создание DataFrame с прогнозом
+    df_forecast = generate_forecast(reg_model, training_config['pred_days_forecast'])
+
+    # Сохранение модели
+    joblib.dump(reg_model, os.path.join(training_config["model_path_future"]))
+    # Сохранение лучших параметров
+    joblib.dump(study, os.path.join(training_config["params_path_future"]))

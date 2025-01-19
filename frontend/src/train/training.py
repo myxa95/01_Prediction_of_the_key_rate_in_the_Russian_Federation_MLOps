@@ -103,8 +103,46 @@ def generate_forecast(model, pred_days: pd.DataFrame, df_test: pd.DataFrame):
     test_path = config['train']['test_path']
     df_test = pd.read_csv(test_path)
 
-    future = df_test[['ds']].copy() # копирую даты из df_test
+    future = df_test[['ds']].copy() # копия дат из df_test
     future = pd.concat([future, model.make_future_dataframe(periods=pred_days, freq="D")], ignore_index=True)
     forecast = model.predict(future)
 
+    # Сохранение DataFrame df в файл data/df_forecast.csv
+    output_df_path = config['train']['df_forecast']
+    forecast.to_csv(output_df_path, index=False)
+
     return forecast
+
+def start_training_future(config: dict, endpoint: object) -> None:
+    """
+    Тренировка модели с выводом результатов
+    :param config: конфигурационный файл
+    :param endpoint: endpoint
+    """
+
+    # Train
+    with st.spinner("Модель подбирает параметры..."):
+        output = requests.post(endpoint, timeout=8000)
+    st.success("Model trained!")
+
+    # plot study
+    study = joblib.load(os.path.join(config["train"]["params_path_future"]))
+    print(f"Загруженный объект: {type(study)}")
+    if not isinstance(study, optuna.study.Study):
+        raise ValueError("Загруженный объект не является экземпляром optuna.study.Study")
+
+    # check ntrials
+    if len(study.trials) > 1:
+        # Визуализация важности параметров
+        fig_imp = plot_param_importances(study)
+        # Визуализация истории оптимизации
+        fig_history = plot_optimization_history(study)
+        # Визуализация временной шкалы
+        fig_timeline = plot_timeline(study)
+
+        # Отображение графиков в Streamlit
+        st.plotly_chart(fig_imp, use_container_width=True)
+        st.plotly_chart(fig_history, use_container_width=True)
+        st.plotly_chart(fig_timeline, use_container_width=True)
+    else:
+        st.warning("Недостаточно пробных запусков для оценки важности параметров.")
