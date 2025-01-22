@@ -13,7 +13,7 @@ from src.data.interpolate_missing_values_and_prepare import interpolate_missing_
 from src.data.split_dataset import split_dataset
 from src.plotting.get_plot import plot_key_rate, plot_features, plot_interpolate, plot_train_test_split, plot_test_forecast, plot_future_forecast
 from src.plotting.create_features import create_features
-from src.train.training import start_training, start_training_future, generate_forecast
+from src.train.training import start_training, start_training_future, generate_forecast, generate_forecast_future
 import time
 
 CONFIG_PATH = "../config/params.yml"
@@ -196,8 +196,11 @@ def forecast_future_model():
     df_path = config['train']['df_path']
     df = pd.read_csv(df_path)
 
+    # Ввод параметра для прогнозирования
+    forecast_days = st.number_input("Введите количество дней для прогноза:", min_value=1, value=182)
+
     # Создание DataFrame с прогнозом
-    df_forecast = generate_forecast(reg_model, config['train']['pred_days_forecast'], df)
+    df_forecast = generate_forecast_future(reg_model, forecast_days, df)
 
     # График прогноза
     st.markdown("# График прогноза")

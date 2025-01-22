@@ -161,10 +161,10 @@ def plot_test_forecast(df_test: pd.DataFrame, df_forecast: pd.DataFrame) -> None
 
 def plot_future_forecast(df: pd.DataFrame, df_forecast: pd.DataFrame) -> None:
     """
-    Отображает график с данными тестовой выборки и прогнозом.
+    Отображает график с данными полной выборки и прогнозом.
 
     Параметры:
-    df_test (pandas.DataFrame): Данные тестовой выборки.
+    df (pandas.DataFrame): Данные полной выборки.
     df_forecast (pandas.DataFrame): Прогнозные данные.
     
     Возвращает:
@@ -176,12 +176,15 @@ def plot_future_forecast(df: pd.DataFrame, df_forecast: pd.DataFrame) -> None:
 
     fig, ax = plt.subplots()
 
-    sns.lineplot(x='ds', y='y', data=df, label='Полные данные', ax=ax)
+    sns.lineplot(x='ds', y='y', data=df, label='Курс клюевой ставки ЦБ РФ', ax=ax)
     sns.lineplot(x='ds', y='yhat', data=df_forecast, label='Прогноз', ax=ax)
+    sns.lineplot(x='ds', y='yhat_lower', data=df_forecast, label='Самый низкий курс прогноза', color='green', ax=ax)
+    sns.lineplot(x='ds', y='yhat_upper', data=df_forecast, label='Самый высокий курс прогноза', color='red', ax=ax)
+
 
     ax.set_xlabel('Дата')
     ax.set_ylabel('Значение ставки')
-    ax.set_title('Сравнение тестовых данных и прогноза')
+    ax.set_title('Сравнение фактических данных и прогноза')
     ax.legend(loc='best')
     ax.grid(True)
 

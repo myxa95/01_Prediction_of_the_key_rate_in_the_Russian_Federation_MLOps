@@ -146,3 +146,34 @@ def start_training_future(config: dict, endpoint: object) -> None:
         st.plotly_chart(fig_timeline, use_container_width=True)
     else:
         st.warning("Недостаточно пробных запусков для оценки важности параметров.")
+
+
+def generate_forecast_future(model, pred_days: pd.DataFrame, df: pd.DataFrame):
+    """
+    Генерирует прогноз на заданное количество дней вперед.
+
+    Параметры:
+    - model: модель, используемая для прогнозирования
+    - pred_days: количество дней, на которое нужно сделать прогноз
+
+    Возвращает:
+    - forecast: DataFrame с прогнозом
+    """
+
+
+    with open(CONFIG_PATH, encoding='utf-8') as file:
+        config = yaml.load(file, Loader=yaml.FullLoader)
+
+    # Чтение DataFrame df в файл data/df.csv
+    df_path = config['train']['df_path']
+    df = pd.read_csv(df_path)
+
+    future = df[['ds']].copy() # копия дат из df
+    future = pd.concat([future, model.make_future_dataframe(periods=pred_days, freq="D")], ignore_index=True)
+    forecast = model.predict(future)
+
+    # Сохранение DataFrame df в файл data/df_forecast.csv
+    output_df_path = config['train']['df_forecast_future']
+    forecast.to_csv(output_df_path, index=False)
+
+    return forecast
