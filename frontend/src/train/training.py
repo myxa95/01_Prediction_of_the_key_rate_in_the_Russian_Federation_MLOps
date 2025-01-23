@@ -168,8 +168,11 @@ def generate_forecast_future(model, pred_days: pd.DataFrame, df: pd.DataFrame):
     df_path = config['train']['df_path']
     df = pd.read_csv(df_path)
 
-    future = df[['ds']].copy() # копия дат из df
-    future = pd.concat([future, model.make_future_dataframe(periods=pred_days, freq="D")], ignore_index=True)
+    future = df[['ds']].copy()  # копия дат из df
+    future = pd.concat(
+        [future, model.make_future_dataframe(periods=pred_days, freq="D")],
+        ignore_index=True
+    )
     forecast = model.predict(future)
 
     # Сохранение DataFrame df в файл data/df_forecast.csv

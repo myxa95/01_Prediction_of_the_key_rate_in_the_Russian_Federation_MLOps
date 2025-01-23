@@ -159,14 +159,15 @@ def plot_test_forecast(df_test: pd.DataFrame, df_forecast: pd.DataFrame) -> None
 
     return fig
 
-def plot_future_forecast(df: pd.DataFrame, df_forecast: pd.DataFrame) -> None:
+def plot_future_forecast(df: pd.DataFrame, df_forecast: pd.DataFrame, forecast_days: int) -> None:
     """
     Отображает график с данными полной выборки и прогнозом.
 
     Параметры:
     df (pandas.DataFrame): Данные полной выборки.
     df_forecast (pandas.DataFrame): Прогнозные данные.
-    
+    forecast_days (int): Количество дней прогноза.
+
     Возвращает:
     fig, ax: Объекты графиков для дальнейшего использования.
     """
@@ -174,13 +175,16 @@ def plot_future_forecast(df: pd.DataFrame, df_forecast: pd.DataFrame) -> None:
     df['ds'] = pd.to_datetime(df['ds'])
     df_forecast['ds'] = pd.to_datetime(df_forecast['ds'])
 
+    # Последние данные равные периоду forecast_days
+    df = df.tail(forecast_days*2)
+
+    # Последние данные равные периоду forecast_days*2
+    df_forecast = df_forecast.tail(forecast_days*4)
+
     fig, ax = plt.subplots()
 
     sns.lineplot(x='ds', y='y', data=df, label='Курс клюевой ставки ЦБ РФ', ax=ax)
     sns.lineplot(x='ds', y='yhat', data=df_forecast, label='Прогноз', ax=ax)
-    sns.lineplot(x='ds', y='yhat_lower', data=df_forecast, label='Самый низкий курс прогноза', color='green', ax=ax)
-    sns.lineplot(x='ds', y='yhat_upper', data=df_forecast, label='Самый высокий курс прогноза', color='red', ax=ax)
-
 
     ax.set_xlabel('Дата')
     ax.set_ylabel('Значение ставки')

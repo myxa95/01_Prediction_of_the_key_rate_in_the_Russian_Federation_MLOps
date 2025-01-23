@@ -214,7 +214,7 @@ def forecast_future_model():
 
     # График участка прогноза будущих периодов
     st.markdown("# График участка прогноза будущих периодов")
-    fig = plot_future_forecast(df=df, df_forecast=df_forecast)
+    fig = plot_future_forecast(df=df, df_forecast=df_forecast, forecast_days=forecast_days)
     st.pyplot(fig)
 
 def main():
