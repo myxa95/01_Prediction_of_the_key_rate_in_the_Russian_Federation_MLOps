@@ -1,4 +1,4 @@
-FROM python:3.8-slim-buster
+FROM python:3.11-slim-buster
 
 WORKDIR /app/frontend
 COPY . .
@@ -10,8 +10,11 @@ RUN apt-get update && \
         build-essential \
         gcc
 
-RUN pip install --upgrade pip && \
-    pip install --ignore-installed -r requirements.txt
+# Установка Poetry
+RUN pip install poetry
+
+# Установка зависимостей с помощью Poetry
+RUN poetry install --no-root
 
 
 EXPOSE 8501

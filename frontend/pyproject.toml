@@ -1,0 +1,35 @@
+[tool.poetry]
+name = "01-prediction-of-the-key-rate-in-the-russian-federation-mlops"
+version = "0.1.0"
+description = ""
+authors = ["myxa95"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pandas = "*"
+matplotlib = "*"
+numpy = "<2.0"
+requests = "*"
+beautifulsoup4 = "*"
+scipy = "*"
+holidays = "*"
+prophet = "*"
+scikit-learn = "*"
+plotly = "*"
+optuna = "*"
+seaborn = "*"
+black = "*"
+fastapi = "*"
+pydantic = "*"
+uvicorn = "^0.30.6"
+lxml = "^5.3.0"
+streamlit = "^1.39.0"
+
+[tool.poetry.group.dev.dependencies]
+ipykernel = "^6.29.5"
+vulture = "^2.14"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

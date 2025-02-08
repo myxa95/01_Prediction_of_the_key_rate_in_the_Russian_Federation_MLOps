@@ -31,7 +31,7 @@ frontend:
   main_image: '../data/frontend/main_image.png'
 
 endpoints:
-  train_test: 'http://localhost:8000/train_test'
-  train_future: 'http://localhost:8000/train_future'
-  # train_test: 'http://fastapi:8000/train'
-  # train_future: 'http://fastapi:8000/train_future'
+  # train_test: 'http://localhost:8000/train_test'
+  # train_future: 'http://localhost:8000/train_future'
+  train_test: 'http://fastapi:8000/train_test'
+  train_future: 'http://fastapi:8000/train_future'
