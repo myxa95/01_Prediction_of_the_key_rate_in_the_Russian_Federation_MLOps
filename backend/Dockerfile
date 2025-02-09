@@ -1,8 +1,8 @@
 FROM python:3.11-slim-buster
 
-WORKDIR /app/backend
-COPY . .
-
+WORKDIR /app
+COPY backend ./backend
+COPY pyproject.toml poetry.lock ./
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -10,14 +10,16 @@ RUN apt-get update && \
         cmake \
         build-essential \
         gcc \
-        g++
+        g++ && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
-# Установка Poetry
-RUN pip install poetry
+# Установка Poetry и зависимостей
+RUN pip install poetry && \
+    poetry config virtualenvs.create false && \
+    poetry install --no-root
 
-# Установка зависимостей с помощью Poetry
-RUN poetry install --no-root
-
+WORKDIR /app/backend
 EXPOSE 8000
 
 ENTRYPOINT ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
